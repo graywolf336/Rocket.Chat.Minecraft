@@ -1,0 +1,13 @@
+system:
+  debug: true
+connection:
+  host: 'chat.server.com'
+  port: 443
+  ssl: true
+  email: 'email@example.com'
+  password: 'password'
+features:
+  server-updates:
+    enabled: true
+    channel: '#testing-ddp'
+  
