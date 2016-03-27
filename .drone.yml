@@ -4,9 +4,9 @@ clone:
 build:
   image: jamesdbloom/docker-java8-maven
   commands:
-    - mvn clean install
+    - mvn clean install deploy
 
 notify:
-  email:
-    recipients:
-      - bradley@fidetech.io
+  slack:
+    webhook_url: https://chat.fidetech.io/hooks/cpxX2EtNcZQybc3tk/HDka7RrrsL8uWQaifZzgTegNrHqNExN5QewCoqMRt4JxPjhB
+    channel: rocket.chat
