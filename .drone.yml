@@ -9,8 +9,8 @@ build:
 publish:
   drone-mvn:
     image: thomasf/drone-mvn
-    username: deployment
-    password: admin469_
+    username: $$MVN_USERNAME
+    password: $$MVN_PASSWORD
     url: https://repo.craftyn.com/repository/graywolf336-snapshots/
     group: com.graywolf336
     artifact: rocket.chat
@@ -23,5 +23,5 @@ publish:
 
 notify:
   slack:
-    webhook_url: https://chat.fidetech.io/hooks/cpxX2EtNcZQybc3tk/HDka7RrrsL8uWQaifZzgTegNrHqNExN5QewCoqMRt4JxPjhB
+    webhook_url: $$ROCKET_URL
     channel: rocket.chat
