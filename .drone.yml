@@ -2,7 +2,7 @@ clone:
   path: git.fidetech.io/bradley/Rocket.Chat.Minecraft
 
 build:
-  image: java:8
+  image: jamesdbloom/docker-java8-maven
   commands:
     - mvn clean install
 
