@@ -2,7 +2,7 @@ clone:
   path: git.fidetech.io/bradley/Rocket.Chat.Minecraft
 
 build:
-  image: oracle-java8
+  image: java:8
   script:
     - mvn clean install
 
