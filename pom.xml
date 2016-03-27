@@ -52,11 +52,11 @@
 			<id>drone</id>
 			<activation>
 				<property>
-					<name>env.DRONE_BUILD_NUMBER</name>
+					<name>env.DRONE_JOB_NUMBER</name>
 				</property>
 			</activation>
 			<properties>
-				<project.build.number>${env.DRONE_BUILD_NUMBER}</project.build.number>
+				<project.build.number>${env.DRONE_JOB_NUMBER}</project.build.number>
 			</properties>
 		</profile>
 	</profiles>
