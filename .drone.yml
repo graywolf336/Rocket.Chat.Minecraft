@@ -15,7 +15,7 @@ publish:
     group: com.graywolf336
     artifact: rocket.chat
     version: SNAPSHOT
-    source: target/*.jar
+    source: target/rocket.chat*.jar
     extension: jar
 
     when:
