@@ -48,6 +48,17 @@
 				<project.build.number>${env.BUILD_NUMBER}</project.build.number>
 			</properties>
 		</profile>
+		<profile>
+			<id>drone</id>
+			<activation>
+				<property>
+					<name>env.DRONE_BUILD_NUMBER</name>
+				</property>
+			</activation>
+			<properties>
+				<project.build.number>${env.DRONE_BUILD_NUMBER}</project.build.number>
+			</properties>
+		</profile>
 	</profiles>
 
 	<build>
