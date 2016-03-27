@@ -2,7 +2,6 @@ package com.graywolf336.rocketchat;
 
 import java.net.URISyntaxException;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Observable;
 import java.util.Observer;
 

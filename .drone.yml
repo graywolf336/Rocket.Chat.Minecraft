@@ -1,0 +1,7 @@
+image: openjdk8
+script:
+  - mvn clean install
+notify:
+  email:
+    recipients:
+      - bradley@fidetech.io
