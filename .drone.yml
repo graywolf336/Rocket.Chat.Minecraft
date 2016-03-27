@@ -1,6 +1,11 @@
-image: openjdk8
-script:
-  - mvn clean install
+clone:
+  path: git.fidetech.io/bradley/Rocket.Chat.Minecraft
+
+build:
+  image: openjdk8
+  script:
+    - mvn clean install
+
 notify:
   email:
     recipients:
