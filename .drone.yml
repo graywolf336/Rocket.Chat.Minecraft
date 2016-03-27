@@ -4,7 +4,22 @@ clone:
 build:
   image: jamesdbloom/docker-java8-maven
   commands:
-    - mvn clean install deploy
+    - mvn clean install
+
+publish:
+  drone-mvn:
+    image: thomasf/drone-mvn
+    username: deployment
+    password: admin469_
+    url: https://repo.craftyn.com/repository/graywolf336-snapshots/
+    group: com.graywolf336
+    artifact: rocket.chat
+    version: SNAPSHOT
+    source: target/*.jar
+    extension: jar
+
+    when:
+      branch: master
 
 notify:
   slack:
