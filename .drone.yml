@@ -14,7 +14,7 @@ publish:
     url: https://repo.craftyn.com/repository/graywolf336-snapshots/
     group: com.graywolf336
     artifact: rocket.chat
-    version: SNAPSHOT
+    version: $$TAG-SNAPSHOT
     source: target/rocket.chat*.jar
     extension: jar
 
