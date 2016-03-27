@@ -1,0 +1,7 @@
+server-updates:
+  enabled: true
+  default-room: '#testing-ddp'
+  start-up:
+    enabled: true
+    room: '#the-new-craftyn-spawn-ig-chat'
+    format: ':wine_glass: cheers to all! The server is now up!'

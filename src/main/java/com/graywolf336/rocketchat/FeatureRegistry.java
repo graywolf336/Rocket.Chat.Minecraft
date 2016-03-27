@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.bukkit.plugin.Plugin;
 
-import com.graywolf336.rocketchat.features.ServerUpdateFeature;
+import com.graywolf336.rocketchat.features.serverupdates.ServerUpdateFeature;
 import com.graywolf336.rocketchat.interfaces.IFeature;
 
 public class FeatureRegistry {
@@ -61,7 +61,7 @@ public class FeatureRegistry {
         }
     }
     
-    private void loadFeatures(Plugin plugin) {
-        this.features.add(new ServerUpdateFeature());
+    private void loadFeatures(RocketChatMain plugin) {
+        this.features.add(new ServerUpdateFeature(plugin.getRocketChatClient()));
     }
 }

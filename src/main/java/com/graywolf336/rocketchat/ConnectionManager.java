@@ -1,6 +1,8 @@
 package com.graywolf336.rocketchat;
 
 import java.net.URISyntaxException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
@@ -15,6 +17,7 @@ import com.graywolf336.rocketchat.events.RocketChatConnectionConnectedEvent;
 import com.graywolf336.rocketchat.events.RocketChatSuccessfulLoginEvent;
 import com.graywolf336.rocketchat.info.ConnectionClosedInfo;
 import com.graywolf336.rocketchat.info.ConnectionConnectedInfo;
+import com.graywolf336.rocketchat.interfaces.IMessage;
 import com.keysolutions.ddpclient.DDPClient;
 import com.keysolutions.ddpclient.DDPListener;
 import com.keysolutions.ddpclient.EmailAuth;
@@ -32,6 +35,9 @@ public class ConnectionManager {
     
     private ConnectionConnectedInfo connectedInfo;
     private ConnectionClosedInfo closedInfo;
+    
+    private BukkitTask queueTask;
+    private List<IMessage> queue;
 
     protected ConnectionManager(RocketChatMain plugin) {
         this.plugin = plugin;
@@ -39,6 +45,8 @@ public class ConnectionManager {
         this.resumeToken = "";
         this.reconnectTime = 10;
         this.weDisconnected = false;
+        
+        this.queue = new LinkedList<IMessage>();
     }
 
     /**
@@ -85,6 +93,10 @@ public class ConnectionManager {
         return this.state;
     }
     
+    public boolean queueMessage(IMessage message) {
+    	return this.queue.add(message);
+    }
+    
     private void setConnectionState(ConnectionState state) {
         this.plugin.debug(false, "The connection is now changed to: " + state.toString());
         this.state = state;
@@ -98,9 +110,11 @@ public class ConnectionManager {
             case LOGGEDIN:
             	this.plugin.getServer().getPluginManager().callEvent(new RocketChatSuccessfulLoginEvent(this.state, this.userId));
                 this.plugin.getLogger().info("Successfully logged into Rocket.Chat!");
+                this.startProcessingQueue();
                 break;
             case CLOSED:
             	this.plugin.getServer().getPluginManager().callEvent(new RocketChatConnectionClosedEvent(this.state, this.closedInfo));
+            	this.stopProcessingQueue();
                 if(!weDisconnected) {
                     this.plugin.getLogger().warning("Lost connection, attempting to acquire a connection in " + this.reconnectTime + " ticks.");
                     this.acquireConnection(reconnectTime);
@@ -120,6 +134,26 @@ public class ConnectionManager {
             emailArgs[0] = new EmailAuth(Settings.EMAIL.asString(), Settings.PASSWORD.asString());
             this.ddp.call(Method.LOGIN.get(), emailArgs, new ConnectionAndLoginObserver());
         }, 0);
+    }
+    
+    private void startProcessingQueue() {
+    	this.plugin.debug(false, "Start processing queue called.");
+    	this.queueTask = this.plugin.getServer().getScheduler().runTaskTimerAsynchronously(this.plugin, () -> {
+    		List<IMessage> processing = new LinkedList<IMessage>(this.queue);
+    		this.queue.clear();
+    		
+    		for(IMessage m : processing) {
+    			this.plugin.debug(false, "Processing the message: " + m.getMessage());
+    		}
+    	}, 0, 10);
+    }
+    
+    private void stopProcessingQueue() {
+    	if(this.queueTask != null) {
+    		this.plugin.debug(false, "Stop processing queue called.");
+    		this.queueTask.cancel();
+    		this.queueTask = null;
+    	}
     }
     
     @SuppressWarnings("unchecked")

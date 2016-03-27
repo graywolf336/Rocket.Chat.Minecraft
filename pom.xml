@@ -75,6 +75,14 @@
 					<include>*.yml</include>
 				</includes>
 			</resource>
+			<resource>
+				<targetPath>./features</targetPath>
+				<filtering>true</filtering>
+				<directory>${basedir}/src/main/resources/features/</directory>
+				<includes>
+					<include>*.yml</include>
+				</includes>
+			</resource>
 		</resources>
 
 		<!-- Plugins -->

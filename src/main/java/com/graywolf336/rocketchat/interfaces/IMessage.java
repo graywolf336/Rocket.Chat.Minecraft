@@ -9,5 +9,7 @@ public interface IMessage {
      public void setIconUrl(String iconUrl);
      public Emoji getIconEmoji();
      public void setIconEmoji(Emoji iconEmoji);
+     public String getMessage();
+     public void setMessage(String message);
      public boolean isValid();
 }

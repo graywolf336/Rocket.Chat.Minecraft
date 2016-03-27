@@ -1647,4 +1647,8 @@ public enum Emoji {
         
         return null;
     }
+    
+    public String toString() {
+    	return this.code;
+    }
 }

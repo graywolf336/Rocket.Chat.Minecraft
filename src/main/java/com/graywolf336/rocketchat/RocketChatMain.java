@@ -7,6 +7,7 @@ import com.graywolf336.rocketchat.enums.Settings;
 public class RocketChatMain extends JavaPlugin {
     private ConnectionManager connection;
     private FeatureRegistry registry;
+    private RocketChatClient client;
     private boolean debug;
     
     public void onLoad() {
@@ -15,6 +16,7 @@ public class RocketChatMain extends JavaPlugin {
         this.debug = Settings.DEBUG.asBoolean();
         
         this.connection = new ConnectionManager(this);
+        this.client = new RocketChatClient(this, this.connection);
         this.registry = new FeatureRegistry(this);
         this.registry.onLoad(this);
     }
@@ -27,6 +29,10 @@ public class RocketChatMain extends JavaPlugin {
     public void onDisable() {
         this.registry.onDisable(this);
         this.connection.disconnectConnection();
+    }
+    
+    public RocketChatClient getRocketChatClient() {
+    	return this.client;
     }
     
     /**

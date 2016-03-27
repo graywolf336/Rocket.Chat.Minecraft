@@ -3,13 +3,25 @@ package com.graywolf336.rocketchat;
 import com.graywolf336.rocketchat.interfaces.IMessage;
 
 public class RocketChatClient {
-    private static ConnectionManager conn;
+	private RocketChatMain plugin;
+    private ConnectionManager conn;
     
-    protected RocketChatClient(ConnectionManager connection) {
-        conn = connection;
+    protected RocketChatClient(RocketChatMain plugin, ConnectionManager connection) {
+    	this.plugin = plugin;
+        this.conn = connection;
     }
     
-    public static void sendMessage(IMessage message) {
-        //TODO: This.
+    public RocketChatMain getPlugin() {
+    	return this.plugin;
+    }
+    
+    public ConnectionManager getConnectionManager() {
+    	return this.conn;
+    }
+    
+    public void sendMessage(IMessage message) {
+    	if(message.isValid()) {
+    		this.conn.queueMessage(message);
+    	}
     }
 }
