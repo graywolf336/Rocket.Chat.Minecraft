@@ -10,6 +10,11 @@ import org.bukkit.scheduler.BukkitTask;
 import com.graywolf336.rocketchat.enums.ConnectionState;
 import com.graywolf336.rocketchat.enums.Method;
 import com.graywolf336.rocketchat.enums.Settings;
+import com.graywolf336.rocketchat.events.RocketChatConnectionClosedEvent;
+import com.graywolf336.rocketchat.events.RocketChatConnectionConnectedEvent;
+import com.graywolf336.rocketchat.events.RocketChatSuccessfulLoginEvent;
+import com.graywolf336.rocketchat.info.ConnectionClosedInfo;
+import com.graywolf336.rocketchat.info.ConnectionConnectedInfo;
 import com.keysolutions.ddpclient.DDPClient;
 import com.keysolutions.ddpclient.DDPListener;
 import com.keysolutions.ddpclient.EmailAuth;
@@ -24,6 +29,9 @@ public class ConnectionManager {
     private String resumeToken;
     private long reconnectTime;
     private boolean weDisconnected;
+    
+    private ConnectionConnectedInfo connectedInfo;
+    private ConnectionClosedInfo closedInfo;
 
     protected ConnectionManager(RocketChatMain plugin) {
         this.plugin = plugin;
@@ -40,6 +48,10 @@ public class ConnectionManager {
      * @return the instance of the {@link BukkitTask} the code is running in.
      */
     public BukkitTask acquireConnection(long timeUntilRan) {
+    	this.weDisconnected = false;
+    	this.connectedInfo = null;
+    	this.closedInfo = null;
+    	
         return this.plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, () -> {
             try {
                 this.ddp = new DDPClient(Settings.HOST.asString(), Settings.PORT.asInt(), Settings.SSL.asBoolean());
@@ -53,6 +65,7 @@ public class ConnectionManager {
         }, timeUntilRan);
     }
     
+    /** Disconnects from the Rocket.Chat server, without reconnecting. */
     public void disconnectConnection() {
         //Is this even required? Does it even get called?
         if(!this.resumeToken.isEmpty()) {
@@ -63,6 +76,11 @@ public class ConnectionManager {
         this.ddp.disconnect();
     }
 
+    /**
+     * Gets the current state of the connection.
+     * 
+     * @return the {@link ConnectionState state of the connection}
+     */
     public ConnectionState getConnectionState() {
         return this.state;
     }
@@ -73,13 +91,16 @@ public class ConnectionManager {
         
         switch(this.state) {
             case CONNECTED:
+            	this.plugin.getServer().getPluginManager().callEvent(new RocketChatConnectionConnectedEvent(this.state, connectedInfo));
                 this.reconnectTime = 10;
                 this.attemptLogin();
                 break;
             case LOGGEDIN:
+            	this.plugin.getServer().getPluginManager().callEvent(new RocketChatSuccessfulLoginEvent(this.state, this.userId));
                 this.plugin.getLogger().info("Successfully logged into Rocket.Chat!");
                 break;
             case CLOSED:
+            	this.plugin.getServer().getPluginManager().callEvent(new RocketChatConnectionClosedEvent(this.state, this.closedInfo));
                 if(!weDisconnected) {
                     this.plugin.getLogger().warning("Lost connection, attempting to acquire a connection in " + this.reconnectTime + " ticks.");
                     this.acquireConnection(reconnectTime);
@@ -120,6 +141,8 @@ public class ConnectionManager {
 
                 if (msgtype.equals(DdpMessageType.CONNECTED)) {
                     String mSessionId = (String) jsonFields.get(DdpMessageField.SESSION);
+                    
+                    connectedInfo = new ConnectionConnectedInfo(mSessionId);
                     setConnectionState(ConnectionState.CONNECTED);
                     plugin.getLogger().info("Connected and the session id is: " + mSessionId);
                 }
@@ -129,6 +152,7 @@ public class ConnectionManager {
                     String mCloseReason = (String) jsonFields.get(DdpMessageField.REASON);
                     boolean mCloseFromRemote = (Boolean) jsonFields.get(DdpMessageField.REMOTE);
 
+                    closedInfo = new ConnectionClosedInfo(mCloseCode, mCloseReason, mCloseFromRemote);
                     setConnectionState(ConnectionState.CLOSED);
                     plugin.debug(false, "Closed connection" + (mCloseFromRemote ? " from the remote " : " ") + "with a reason of '" + mCloseReason + "' and a close code of " + mCloseCode);
                 }
