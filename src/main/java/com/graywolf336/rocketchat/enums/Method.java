@@ -1,7 +1,8 @@
 package com.graywolf336.rocketchat.enums;
 
 public enum Method {
-    LOGIN("login");
+    LOGIN("login"),
+    SENDMESSAGE("sendMessage");
     
     private String method;
     

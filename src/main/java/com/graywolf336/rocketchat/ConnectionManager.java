@@ -18,6 +18,7 @@ import com.graywolf336.rocketchat.events.RocketChatSuccessfulLoginEvent;
 import com.graywolf336.rocketchat.info.ConnectionClosedInfo;
 import com.graywolf336.rocketchat.info.ConnectionConnectedInfo;
 import com.graywolf336.rocketchat.interfaces.IMessage;
+import com.graywolf336.rocketchat.serializable.RocketChatSerializerFactory;
 import com.keysolutions.ddpclient.DDPClient;
 import com.keysolutions.ddpclient.DDPListener;
 import com.keysolutions.ddpclient.EmailAuth;
@@ -142,9 +143,7 @@ public class ConnectionManager {
     		List<IMessage> processing = new LinkedList<IMessage>(this.queue);
     		this.queue.clear();
     		
-    		for(IMessage m : processing) {
-    			this.plugin.debug(false, "Processing the message: " + m.getMessage());
-    		}
+    		processing.forEach(m -> this.ddp.call(Method.SENDMESSAGE.get(), new Object[] { RocketChatSerializerFactory.getMessage(m) }));
     	}, 0, 10);
     }
     
