@@ -61,6 +61,36 @@ public class FeatureRegistry {
         }
     }
     
+    public void onSuccessfulConnection(Plugin plugin) {
+        for(IFeature feature : features) {
+            try {
+                if(feature.onSuccessfulConnection(plugin)) {
+                    plugin.getLogger().info("Successfully called the onSuccessfulConnection for '" + feature.getName() + "'.");
+                }else {
+                    plugin.getLogger().warning("OnSuccessfulConnection failed to be successful for '" + feature.getName() + "'.");
+                }
+            }catch(Exception e) {
+                e.printStackTrace();
+                plugin.getLogger().severe("The onSuccessfulConnection for '" + feature.getName() + "' threw an exception! See the above.");
+            }
+        }
+    }
+    
+    public void onFailedConnection(Plugin plugin) {
+        for(IFeature feature : features) {
+            try {
+                if(feature.onFailedConnection(plugin)) {
+                    plugin.getLogger().info("Successfully called the onFailedConnection for '" + feature.getName() + "'.");
+                }else {
+                    plugin.getLogger().warning("OnFailedConnection failed to be successful for '" + feature.getName() + "'.");
+                }
+            }catch(Exception e) {
+                e.printStackTrace();
+                plugin.getLogger().severe("The onFailedConnection for '" + feature.getName() + "' threw an exception! See the above.");
+            }
+        }
+    }
+    
     private void loadFeatures(RocketChatMain plugin) {
         this.features.add(new ServerUpdateFeature(plugin.getRocketChatClient()));
     }

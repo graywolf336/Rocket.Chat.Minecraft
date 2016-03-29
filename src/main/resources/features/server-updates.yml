@@ -5,3 +5,7 @@ server-updates:
     enabled: true
     room: '#the-new-craftyn-spawn-ig-chat'
     format: ':wine_glass: cheers to all! The server is now up!'
+  shut-down:
+    enabled: true
+    room: '#the-new-craftyn-spawn-ig-chat'
+    format: ':broken_heart: how sad, the server is now down! :cry:'

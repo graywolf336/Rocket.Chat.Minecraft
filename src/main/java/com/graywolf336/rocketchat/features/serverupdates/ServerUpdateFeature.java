@@ -61,15 +61,19 @@ public class ServerUpdateFeature implements IFeature {
     }
 
     public boolean onDisable(Plugin plugin) {
-        return false;
+        if(ServerUpdateSettings.SHUTDOWN_ENABLED.asBoolean()) {
+            this.client.sendMessage(new RocketChatMessage(ServerUpdateSettings.SHUTDOWN_FORMAT.asString()));
+        }
+        
+        return true;
     }
     
     public boolean onSuccessfulConnection(Plugin plugin) {
-        return false;
+        return true;
     }
     
     public boolean onFailedConnection(Plugin plugin) {
-        return false;
+        return true;
     }
     
     private void logInfo(String message) {

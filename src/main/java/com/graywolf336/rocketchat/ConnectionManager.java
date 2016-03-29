@@ -76,9 +76,12 @@ public class ConnectionManager {
     
     /** Disconnects from the Rocket.Chat server, without reconnecting. */
     public void disconnectConnection() {
+        //Finish processing the queue
+        this.processQueue();
+        
         //Is this even required? Does it even get called?
         if(!this.resumeToken.isEmpty()) {
-            this.ddp.call("logout", null);
+            this.ddp.call(Method.LOGOUT.get(), null);
         }
         
         this.weDisconnected = true;
@@ -94,6 +97,12 @@ public class ConnectionManager {
         return this.state;
     }
     
+    /**
+     * Adds a message to the queue. The queue is processed twice a second.
+     * 
+     * @param message the {@link IMessage} to queue
+     * @return whether it was added to the queue or not
+     */
     public boolean queueMessage(IMessage message) {
     	return this.queue.add(message);
     }
@@ -112,10 +121,12 @@ public class ConnectionManager {
             	this.plugin.getServer().getPluginManager().callEvent(new RocketChatSuccessfulLoginEvent(this.state, this.userId));
                 this.plugin.getLogger().info("Successfully logged into Rocket.Chat!");
                 this.startProcessingQueue();
+                this.plugin.getRegistry().onSuccessfulConnection(this.plugin);
                 break;
             case CLOSED:
             	this.plugin.getServer().getPluginManager().callEvent(new RocketChatConnectionClosedEvent(this.state, this.closedInfo));
             	this.stopProcessingQueue();
+            	this.plugin.getRegistry().onFailedConnection(this.plugin);
                 if(!weDisconnected) {
                     this.plugin.getLogger().warning("Lost connection, attempting to acquire a connection in " + this.reconnectTime + " ticks.");
                     this.acquireConnection(reconnectTime);
@@ -140,11 +151,15 @@ public class ConnectionManager {
     private void startProcessingQueue() {
     	this.plugin.debug(false, "Start processing queue called.");
     	this.queueTask = this.plugin.getServer().getScheduler().runTaskTimerAsynchronously(this.plugin, () -> {
-    		List<IMessage> processing = new LinkedList<IMessage>(this.queue);
-    		this.queue.clear();
-    		
-    		processing.forEach(m -> this.ddp.call(Method.SENDMESSAGE.get(), new Object[] { RocketChatSerializerFactory.getMessage(m) }));
+    		this.processQueue();
     	}, 0, 10);
+    }
+    
+    private void processQueue() {
+        List<IMessage> processing = new LinkedList<IMessage>(this.queue);
+        this.queue.clear();
+        
+        processing.forEach(m -> ddp.call(Method.SENDMESSAGE.get(), new Object[] { RocketChatSerializerFactory.getMessage(m) }));
     }
     
     private void stopProcessingQueue() {

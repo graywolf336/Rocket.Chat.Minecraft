@@ -35,6 +35,10 @@ public class RocketChatMain extends JavaPlugin {
     	return this.client;
     }
     
+    protected FeatureRegistry getRegistry() {
+        return this.registry;
+    }
+    
     /**
      * Prints messages if the plugin is in a debugging state.
      * 

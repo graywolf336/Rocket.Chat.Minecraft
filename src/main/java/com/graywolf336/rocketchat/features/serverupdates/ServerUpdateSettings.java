@@ -7,7 +7,10 @@ public enum ServerUpdateSettings {
 	DEFAULTROOM("server-updates.default-room"),
 	STARTUP_ENABLED("server-updates.start-up.enabled"),
 	STARTUP_ROOM("server-updates.start-up.room"),
-	STARTUP_FORMAT("server-updates.start-up.format");
+	STARTUP_FORMAT("server-updates.start-up.format"),
+	SHUTDOWN_ENABLED("server-updates.shut-down.enabled"),
+	SHUTDOWN_ROOM("server-updates.shut-down.room"),
+	SHUTDOWN_FORMAT("server-updates.shut-down.format");
 	
 	
 	private static YamlConfiguration config;
