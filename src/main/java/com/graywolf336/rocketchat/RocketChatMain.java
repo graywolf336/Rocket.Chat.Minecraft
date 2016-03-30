@@ -8,6 +8,7 @@ public class RocketChatMain extends JavaPlugin {
     private ConnectionManager connection;
     private FeatureRegistry registry;
     private RocketChatClient client;
+    private RocketChatRoomManager rooms;
     private boolean debug;
     
     public void onLoad() {
@@ -22,6 +23,7 @@ public class RocketChatMain extends JavaPlugin {
     }
     
     public void onEnable() {
+    	this.rooms = new RocketChatRoomManager(this, this.connection);
         this.connection.acquireConnection(0);
         this.registry.onEnable(this);
     }
@@ -33,6 +35,10 @@ public class RocketChatMain extends JavaPlugin {
     
     public RocketChatClient getRocketChatClient() {
     	return this.client;
+    }
+    
+    public RocketChatRoomManager getRocketChatRoomManager() {
+    	return this.rooms;
     }
     
     protected FeatureRegistry getRegistry() {

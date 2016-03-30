@@ -98,6 +98,17 @@ public class ConnectionManager {
     }
     
     /**
+     * Calls the given method to the Rocket.Chat server.
+     * 
+     * @param method the {@link Method} to call.
+     * @param params the params to pass, can be null.
+     * @param listener the {@link RocketChatCallListener}, can be null.
+     */
+    public void callMethod(Method method, Object[] params, RocketChatCallListener listener) {
+    	this.ddp.call(method.get(), params, listener == null ? null : listener.toDDPListener());
+    }
+    
+    /**
      * Adds a message to the queue. The queue is processed twice a second.
      * 
      * @param message the {@link IMessage} to queue

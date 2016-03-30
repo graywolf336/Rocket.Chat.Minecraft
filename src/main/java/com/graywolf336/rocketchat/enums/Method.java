@@ -1,6 +1,7 @@
 package com.graywolf336.rocketchat.enums;
 
 public enum Method {
+	CHANNELLIST("channelsList"),
     LOGIN("login"),
     LOGOUT("logout"),
     SENDMESSAGE("sendMessage");
