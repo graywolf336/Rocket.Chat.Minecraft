@@ -25,35 +25,41 @@ public class ServerUpdateFeature implements IFeature {
     @SuppressWarnings("deprecation")
 	public boolean onLoad(Plugin plugin) {
     	File configFile = new File(plugin.getDataFolder() + File.separator + "features", "server-updates.yml");
+    	YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(plugin.getResource("features/server-updates.yml"));
+    	boolean save = false;
     	
     	if(configFile.exists()) {
     		if(configFile.isFile()) {
-    			ServerUpdateSettings.setConfig(YamlConfiguration.loadConfiguration(configFile));
+    			ServerUpdateSetting.setConfig(YamlConfiguration.loadConfiguration(configFile));
+    			save = ServerUpdateSetting.writeNewConfigValues(defaultConfig);
     			this.logInfo("Loaded the config from existing file.");
     		}else {
     			this.logSevere("The config file can not be a folder.");
     			this.logSevere("As a result, we are reverting back to the default configuration.");
-    			ServerUpdateSettings.setConfig(YamlConfiguration.loadConfiguration(plugin.getResource("features/server-updates.yml")));
+    			ServerUpdateSetting.setConfig(defaultConfig);
     		}
     	}else {
     		this.logWarn("Loading the default config.");
-    		ServerUpdateSettings.setConfig(YamlConfiguration.loadConfiguration(plugin.getResource("features/server-updates.yml")));
-    		
-    		try {
-    			ServerUpdateSettings.getConfig().save(configFile);
-    		}catch(IOException e) {
-    			this.logSevere("Failed to save the default configuration: " + e.getMessage() + " (" + e.getClass().getSimpleName() + ")");
-    			return false;
-    		}
+    		ServerUpdateSetting.setConfig(defaultConfig);
+    		save = true;
+    	}
+    	
+    	if(save) {
+    	    try {
+                ServerUpdateSetting.getConfig().save(configFile);
+            }catch(IOException e) {
+                this.logSevere("Failed to save the default configuration: " + e.getMessage() + " (" + e.getClass().getSimpleName() + ")");
+                return false;
+            }
     	}
     	
         return true;
     }
     
     public boolean onEnable(Plugin plugin) {
-    	if(ServerUpdateSettings.STARTUP_ENABLED.asBoolean()) {
+    	if(ServerUpdateSetting.STARTUP_ENABLED.asBoolean()) {
     		this.client.getPlugin().getServer().getScheduler().runTaskAsynchronously(this.client.getPlugin(), () -> {
-        		this.client.sendMessage(new RocketChatMessage(ServerUpdateSettings.STARTUP_FORMAT.asString()));
+        		this.client.sendMessage(new RocketChatMessage(ServerUpdateSetting.STARTUP_FORMAT.asString()));
         	});
     	}
     	
@@ -61,8 +67,8 @@ public class ServerUpdateFeature implements IFeature {
     }
 
     public boolean onDisable(Plugin plugin) {
-        if(ServerUpdateSettings.SHUTDOWN_ENABLED.asBoolean()) {
-            this.client.sendMessage(new RocketChatMessage(ServerUpdateSettings.SHUTDOWN_FORMAT.asString()));
+        if(ServerUpdateSetting.SHUTDOWN_ENABLED.asBoolean()) {
+            this.client.sendMessage(new RocketChatMessage(ServerUpdateSetting.SHUTDOWN_FORMAT.asString()));
         }
         
         return true;

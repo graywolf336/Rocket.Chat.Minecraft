@@ -2,7 +2,7 @@ package com.graywolf336.rocketchat.features.serverupdates;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
-public enum ServerUpdateSettings {
+public enum ServerUpdateSetting {
 	ENABLED("server-updates.enabled"),
 	DEFAULTROOM("server-updates.default-room"),
 	STARTUP_ENABLED("server-updates.start-up.enabled"),
@@ -16,7 +16,7 @@ public enum ServerUpdateSettings {
 	private static YamlConfiguration config;
 	private String path;
 	
-	private ServerUpdateSettings(String path) {
+	private ServerUpdateSetting(String path) {
 		this.path = path;
 	}
 	
@@ -38,5 +38,18 @@ public enum ServerUpdateSettings {
 	
 	public static YamlConfiguration getConfig() {
 		return config;
+	}
+	
+	public static boolean writeNewConfigValues(YamlConfiguration newConfig) {
+	    boolean changedAnything = false;
+	    
+	    for(ServerUpdateSetting s : values()) {
+	        if(!config.contains(s.getPath())) {
+	            config.set(s.getPath(), newConfig.get(s.getPath()));
+	            changedAnything = true;
+	        }
+	    }
+	    
+	    return changedAnything;
 	}
 }
