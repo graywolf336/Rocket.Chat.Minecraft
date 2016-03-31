@@ -57,12 +57,6 @@ public class ServerUpdateFeature implements IFeature {
     }
     
     public boolean onEnable(Plugin plugin) {
-    	if(ServerUpdateSetting.STARTUP_ENABLED.asBoolean()) {
-    		this.client.getPlugin().getServer().getScheduler().runTaskAsynchronously(this.client.getPlugin(), () -> {
-        		this.client.sendMessage(new RocketChatMessage(ServerUpdateSetting.STARTUP_FORMAT.asString()));
-        	});
-    	}
-    	
         return true;
     }
 
@@ -80,6 +74,27 @@ public class ServerUpdateFeature implements IFeature {
     
     public boolean onFailedConnection(Plugin plugin) {
         return true;
+    }
+    
+    public boolean onRoomsLoaded(Plugin plugin) {
+    	if(ServerUpdateSetting.STARTUP_ENABLED.asBoolean()) {
+    		this.client.getPlugin().getServer().getScheduler().runTaskAsynchronously(this.client.getPlugin(), () -> {
+    			RocketChatMessage msg = new RocketChatMessage(ServerUpdateSetting.STARTUP_FORMAT.asString());
+    			
+    			if(this.client.getRoomManager().getRoomByName(ServerUpdateSetting.STARTUP_ROOM.asString()).isPresent()) {
+    				msg.setRoom(this.client.getRoomManager().getRoomByName(ServerUpdateSetting.STARTUP_ROOM.asString()).get());
+    			}else if(this.client.getRoomManager().getRoomByName(ServerUpdateSetting.DEFAULTROOM.asString()).isPresent()) {
+    				msg.setRoom(this.client.getRoomManager().getRoomByName(ServerUpdateSetting.DEFAULTROOM.asString()).get());
+    			}else {
+    				this.client.getPlugin().getLogger().severe("Failed to load the room for the onEnable!");
+    				return;
+    			}
+    			
+        		this.client.sendMessage(msg);
+        	});
+    	}
+    	
+    	return true;
     }
     
     private void logInfo(String message) {

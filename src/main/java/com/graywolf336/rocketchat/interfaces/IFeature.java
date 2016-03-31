@@ -52,4 +52,12 @@ public interface IFeature {
      * @return whether this method ran successfully or not
      */
     public boolean onFailedConnection(Plugin plugin);
+    
+    /**
+     * Called <strong>after</strong> the public channels have been loaded. This is only called <strong>once</strong> per server start up.
+     * 
+     * @param plugin a {@link Plugin} instance
+     * @return whether this method ran successfully or not
+     */
+    public boolean onRoomsLoaded(Plugin plugin);
 }

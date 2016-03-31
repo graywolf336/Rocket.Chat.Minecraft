@@ -91,6 +91,21 @@ public class FeatureRegistry {
         }
     }
     
+    public void onRoomsLoaded(Plugin plugin) {
+        for(IFeature feature : features) {
+            try {
+                if(feature.onRoomsLoaded(plugin)) {
+                    plugin.getLogger().info("Successfully called the onRoomsLoaded for '" + feature.getName() + "'.");
+                }else {
+                    plugin.getLogger().warning("OnRoomsLoaded failed to be successful for '" + feature.getName() + "'.");
+                }
+            }catch(Exception e) {
+                e.printStackTrace();
+                plugin.getLogger().severe("The onRoomsLoaded for '" + feature.getName() + "' threw an exception! See the above.");
+            }
+        }
+    }
+    
     private void loadFeatures(RocketChatMain plugin) {
         this.features.add(new ServerUpdateFeature(plugin.getRocketChatClient()));
     }

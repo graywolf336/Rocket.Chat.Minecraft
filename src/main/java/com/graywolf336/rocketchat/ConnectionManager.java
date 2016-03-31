@@ -56,7 +56,7 @@ public class ConnectionManager {
      * @params timeUntilRan the amount of ticks until the task is ran
      * @return the instance of the {@link BukkitTask} the code is running in.
      */
-    public BukkitTask acquireConnection(long timeUntilRan) {
+    protected BukkitTask acquireConnection(long timeUntilRan) {
     	this.weDisconnected = false;
     	this.connectedInfo = null;
     	this.closedInfo = null;
@@ -75,7 +75,7 @@ public class ConnectionManager {
     }
     
     /** Disconnects from the Rocket.Chat server, without reconnecting. */
-    public void disconnectConnection() {
+    protected void disconnectConnection() {
         //Finish processing the queue
         this.processQueue();
         
@@ -160,7 +160,7 @@ public class ConnectionManager {
     }
     
     private void startProcessingQueue() {
-    	this.plugin.debug(false, "Start processing queue called.");
+    	this.plugin.debug(false, "Started processing the queue.");
     	this.queueTask = this.plugin.getServer().getScheduler().runTaskTimerAsynchronously(this.plugin, () -> {
     		this.processQueue();
     	}, 0, 10);
@@ -175,7 +175,7 @@ public class ConnectionManager {
     
     private void stopProcessingQueue() {
     	if(this.queueTask != null) {
-    		this.plugin.debug(false, "Stop processing queue called.");
+    		this.plugin.debug(false, "Stopped processing the queue.");
     		this.queueTask.cancel();
     		this.queueTask = null;
     	}

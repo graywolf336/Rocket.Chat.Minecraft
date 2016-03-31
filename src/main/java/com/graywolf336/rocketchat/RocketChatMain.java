@@ -17,13 +17,14 @@ public class RocketChatMain extends JavaPlugin {
         this.debug = Settings.DEBUG.asBoolean();
         
         this.connection = new ConnectionManager(this);
-        this.client = new RocketChatClient(this, this.connection);
+        this.rooms = new RocketChatRoomManager(this, this.connection);
+        this.client = new RocketChatClient(this, this.connection, this.rooms);
         this.registry = new FeatureRegistry(this);
         this.registry.onLoad(this);
     }
     
     public void onEnable() {
-    	this.rooms = new RocketChatRoomManager(this, this.connection);
+    	this.rooms.registerListener();
         this.connection.acquireConnection(0);
         this.registry.onEnable(this);
     }
@@ -35,10 +36,6 @@ public class RocketChatMain extends JavaPlugin {
     
     public RocketChatClient getRocketChatClient() {
     	return this.client;
-    }
-    
-    public RocketChatRoomManager getRocketChatRoomManager() {
-    	return this.rooms;
     }
     
     protected FeatureRegistry getRegistry() {

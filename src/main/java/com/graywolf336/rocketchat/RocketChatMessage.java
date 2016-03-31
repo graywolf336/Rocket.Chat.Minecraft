@@ -8,6 +8,10 @@ public class RocketChatMessage implements IMessage {
 	private Emoji emojiIcon;
 	private String msg;
 	
+	public RocketChatMessage() {
+		this.msg = "";
+	}
+	
 	public RocketChatMessage(String message) {
 		this.msg = message;
 	}
