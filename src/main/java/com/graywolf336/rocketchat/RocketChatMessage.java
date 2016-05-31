@@ -6,7 +6,8 @@ import com.graywolf336.rocketchat.interfaces.IRoom;
 
 public class RocketChatMessage implements IMessage {
 	private Emoji emojiIcon;
-	private String msg;
+	private String msg, iconUrl;
+	private IRoom room;
 	
 	public RocketChatMessage() {
 		this.msg = "";
@@ -17,17 +18,19 @@ public class RocketChatMessage implements IMessage {
 	}
 
 	public IRoom getRoom() {
-		return null;
+		return this.room;
 	}
 
 	public void setRoom(IRoom room) {
+		this.room = room;
 	}
 
 	public String getIconUrl() {
-		return null;
+		return this.iconUrl;
 	}
 
 	public void setIconUrl(String iconUrl) {
+		this.iconUrl = iconUrl;
 	}
 
 	public Emoji getIconEmoji() {

@@ -10,6 +10,7 @@ public enum Settings {
     PORT("connection.port"),
     SSL("connection.ssl"),
     EMAIL("connection.email"),
+    USERNAME("connection.username"),
     PASSWORD("connection.password");
     
     private static Plugin pl;

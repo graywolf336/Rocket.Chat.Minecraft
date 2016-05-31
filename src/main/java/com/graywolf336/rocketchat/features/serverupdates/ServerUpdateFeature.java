@@ -62,7 +62,18 @@ public class ServerUpdateFeature implements IFeature {
 
     public boolean onDisable(Plugin plugin) {
         if(ServerUpdateSetting.SHUTDOWN_ENABLED.asBoolean()) {
-            this.client.sendMessage(new RocketChatMessage(ServerUpdateSetting.SHUTDOWN_FORMAT.asString()));
+			RocketChatMessage msg = new RocketChatMessage(ServerUpdateSetting.SHUTDOWN_FORMAT.asString());
+			
+			if(this.client.getRoomManager().getRoomByName(ServerUpdateSetting.SHUTDOWN_ROOM.asString()).isPresent()) {
+				msg.setRoom(this.client.getRoomManager().getRoomByName(ServerUpdateSetting.SHUTDOWN_ROOM.asString()).get());
+			}else if(this.client.getRoomManager().getRoomByName(ServerUpdateSetting.DEFAULTROOM.asString()).isPresent()) {
+				msg.setRoom(this.client.getRoomManager().getRoomByName(ServerUpdateSetting.DEFAULTROOM.asString()).get());
+			}else {
+				logSevere("Failed to load the room for the onDisable!");
+				return false;
+			}
+
+    		this.client.sendMessage(msg);
         }
         
         return true;
@@ -86,10 +97,10 @@ public class ServerUpdateFeature implements IFeature {
     			}else if(this.client.getRoomManager().getRoomByName(ServerUpdateSetting.DEFAULTROOM.asString()).isPresent()) {
     				msg.setRoom(this.client.getRoomManager().getRoomByName(ServerUpdateSetting.DEFAULTROOM.asString()).get());
     			}else {
-    				this.client.getPlugin().getLogger().severe("Failed to load the room for the onEnable!");
+    				logSevere("Failed to load the room for the onEnable!");
     				return;
     			}
-    			
+
         		this.client.sendMessage(msg);
         	});
     	}

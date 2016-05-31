@@ -22,6 +22,7 @@ import com.graywolf336.rocketchat.serializable.RocketChatSerializerFactory;
 import com.keysolutions.ddpclient.DDPClient;
 import com.keysolutions.ddpclient.DDPListener;
 import com.keysolutions.ddpclient.EmailAuth;
+import com.keysolutions.ddpclient.UsernameAuth;
 import com.keysolutions.ddpclient.DDPClient.DdpMessageField;
 import com.keysolutions.ddpclient.DDPClient.DdpMessageType;
 
@@ -153,9 +154,13 @@ public class ConnectionManager {
         return this.plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, () -> {
             this.plugin.debug(false, "Attempting to log into Rocket.Chat as: " + Settings.EMAIL.asString());
             
-            Object[] emailArgs = new Object[1];
-            emailArgs[0] = new EmailAuth(Settings.EMAIL.asString(), Settings.PASSWORD.asString());
-            this.ddp.call(Method.LOGIN.get(), emailArgs, new ConnectionAndLoginObserver());
+            Object[] loginArgs = new Object[1];
+            if(Settings.USERNAME.asString().isEmpty()) {
+            	loginArgs[0] = new EmailAuth(Settings.EMAIL.asString(), Settings.PASSWORD.asString());
+            }else {
+            	loginArgs[0] = new UsernameAuth(Settings.USERNAME.asString(), Settings.PASSWORD.asString());
+            }
+            this.ddp.call(Method.LOGIN.get(), loginArgs, new ConnectionAndLoginObserver());
         }, 0);
     }
     
