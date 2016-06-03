@@ -5,5 +5,5 @@ import com.graywolf336.rocketchat.info.CallResultSuccessInfo;
 
 @FunctionalInterface
 public interface IRocketListener {
-	public void gotResults(CallResultErrorInfo error, CallResultSuccessInfo result);
+    public void gotResults(CallResultErrorInfo error, CallResultSuccessInfo result);
 }

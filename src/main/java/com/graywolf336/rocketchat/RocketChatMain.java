@@ -10,41 +10,41 @@ public class RocketChatMain extends JavaPlugin {
     private RocketChatClient client;
     private RocketChatRoomManager rooms;
     private boolean debug;
-    
+
     public void onLoad() {
         this.saveDefaultConfig();
         Settings.setPlugin(this);
         this.debug = Settings.DEBUG.asBoolean();
-        
+
         this.connection = new ConnectionManager(this);
         this.rooms = new RocketChatRoomManager(this, this.connection);
         this.client = new RocketChatClient(this, this.connection, this.rooms);
         this.registry = new FeatureRegistry(this);
         this.registry.onLoad(this);
     }
-    
+
     public void onEnable() {
-    	this.rooms.registerListener();
+        this.rooms.registerListener();
         this.connection.acquireConnection(0);
         this.registry.onEnable(this);
     }
-    
+
     public void onDisable() {
         this.registry.onDisable(this);
         this.connection.disconnectConnection();
     }
-    
+
     public RocketChatClient getRocketChatClient() {
-    	return this.client;
+        return this.client;
     }
-    
+
     protected FeatureRegistry getRegistry() {
         return this.registry;
     }
-    
+
     /**
      * Prints messages if the plugin is in a debugging state.
-     * 
+     *
      * @param colored whether the messages are colored.
      * @param msgs the messages to print.
      */

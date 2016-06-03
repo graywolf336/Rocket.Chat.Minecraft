@@ -34,10 +34,10 @@ public class ConnectionManager {
     private String resumeToken;
     private long reconnectTime;
     private boolean weDisconnected;
-    
+
     private ConnectionConnectedInfo connectedInfo;
     private ConnectionClosedInfo closedInfo;
-    
+
     private BukkitTask queueTask;
     private List<IMessage> queue;
 
@@ -47,21 +47,21 @@ public class ConnectionManager {
         this.resumeToken = "";
         this.reconnectTime = 10;
         this.weDisconnected = false;
-        
+
         this.queue = new LinkedList<IMessage>();
     }
 
     /**
      * Acquires a connection to the server, with the options provided. <strong>Runs in an asynchronous task.</strong>
-     * 
+     *
      * @params timeUntilRan the amount of ticks until the task is ran
      * @return the instance of the {@link BukkitTask} the code is running in.
      */
     protected BukkitTask acquireConnection(long timeUntilRan) {
-    	this.weDisconnected = false;
-    	this.connectedInfo = null;
-    	this.closedInfo = null;
-    	
+        this.weDisconnected = false;
+        this.connectedInfo = null;
+        this.closedInfo = null;
+
         return this.plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, () -> {
             try {
                 this.ddp = new DDPClient(Settings.HOST.asString(), Settings.PORT.asInt(), Settings.SSL.asBoolean());
@@ -74,72 +74,72 @@ public class ConnectionManager {
             }
         }, timeUntilRan);
     }
-    
+
     /** Disconnects from the Rocket.Chat server, without reconnecting. */
     protected void disconnectConnection() {
-        //Finish processing the queue
+        // Finish processing the queue
         this.processQueue();
-        
-        //Is this even required? Does it even get called?
-        if(!this.resumeToken.isEmpty()) {
+
+        // Is this even required? Does it even get called?
+        if (!this.resumeToken.isEmpty()) {
             this.ddp.call(Method.LOGOUT.get(), null);
         }
-        
+
         this.weDisconnected = true;
         this.ddp.disconnect();
     }
 
     /**
      * Gets the current state of the connection.
-     * 
+     *
      * @return the {@link ConnectionState state of the connection}
      */
     public ConnectionState getConnectionState() {
         return this.state;
     }
-    
+
     /**
      * Calls the given method to the Rocket.Chat server.
-     * 
+     *
      * @param method the {@link Method} to call.
      * @param params the params to pass, can be null.
      * @param listener the {@link RocketChatCallListener}, can be null.
      */
     public void callMethod(Method method, Object[] params, RocketChatCallListener listener) {
-    	this.ddp.call(method.get(), params, listener == null ? null : listener.toDDPListener());
+        this.ddp.call(method.get(), params, listener == null ? null : listener.toDDPListener());
     }
-    
+
     /**
      * Adds a message to the queue. The queue is processed twice a second.
-     * 
+     *
      * @param message the {@link IMessage} to queue
      * @return whether it was added to the queue or not
      */
     public boolean queueMessage(IMessage message) {
-    	return this.queue.add(message);
+        return this.queue.add(message);
     }
-    
+
     private void setConnectionState(ConnectionState state) {
         this.plugin.debug(false, "The connection is now changed to: " + state.toString());
         this.state = state;
-        
-        switch(this.state) {
+
+        switch (this.state) {
             case CONNECTED:
-            	this.plugin.getServer().getPluginManager().callEvent(new RocketChatConnectionConnectedEvent(this.state, connectedInfo));
+                this.plugin.getServer().getPluginManager().callEvent(new RocketChatConnectionConnectedEvent(this.state, connectedInfo));
                 this.reconnectTime = 10;
                 this.attemptLogin();
                 break;
             case LOGGEDIN:
-            	this.plugin.getServer().getPluginManager().callEvent(new RocketChatSuccessfulLoginEvent(this.state, this.userId));
+                this.plugin.getServer().getPluginManager().callEvent(new RocketChatSuccessfulLoginEvent(this.state, this.userId));
                 this.plugin.getLogger().info("Successfully logged into Rocket.Chat!");
                 this.startProcessingQueue();
                 this.plugin.getRegistry().onSuccessfulConnection(this.plugin);
                 break;
             case CLOSED:
-            	this.plugin.getServer().getPluginManager().callEvent(new RocketChatConnectionClosedEvent(this.state, this.closedInfo));
-            	this.stopProcessingQueue();
-            	this.plugin.getRegistry().onFailedConnection(this.plugin);
-                if(!weDisconnected) {
+                this.plugin.getServer().getPluginManager().callEvent(new RocketChatConnectionClosedEvent(this.state, this.closedInfo));
+                this.stopProcessingQueue();
+                this.plugin.getRegistry().onFailedConnection(this.plugin);
+                if (!weDisconnected) {
                     this.plugin.getLogger().warning("Lost connection, attempting to acquire a connection in " + this.reconnectTime + " ticks.");
                     this.acquireConnection(reconnectTime);
                     this.reconnectTime = this.reconnectTime * 2;
@@ -149,43 +149,43 @@ public class ConnectionManager {
                 break;
         }
     }
-    
+
     private BukkitTask attemptLogin() {
         return this.plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, () -> {
             this.plugin.debug(false, "Attempting to log into Rocket.Chat as: " + Settings.EMAIL.asString());
-            
+
             Object[] loginArgs = new Object[1];
-            if(Settings.USERNAME.asString().isEmpty()) {
-            	loginArgs[0] = new EmailAuth(Settings.EMAIL.asString(), Settings.PASSWORD.asString());
-            }else {
-            	loginArgs[0] = new UsernameAuth(Settings.USERNAME.asString(), Settings.PASSWORD.asString());
+            if (Settings.USERNAME.asString().isEmpty()) {
+                loginArgs[0] = new EmailAuth(Settings.EMAIL.asString(), Settings.PASSWORD.asString());
+            } else {
+                loginArgs[0] = new UsernameAuth(Settings.USERNAME.asString(), Settings.PASSWORD.asString());
             }
             this.ddp.call(Method.LOGIN.get(), loginArgs, new ConnectionAndLoginObserver());
         }, 0);
     }
-    
+
     private void startProcessingQueue() {
-    	this.plugin.debug(false, "Started processing the queue.");
-    	this.queueTask = this.plugin.getServer().getScheduler().runTaskTimerAsynchronously(this.plugin, () -> {
-    		this.processQueue();
-    	}, 0, 10);
+        this.plugin.debug(false, "Started processing the queue.");
+        this.queueTask = this.plugin.getServer().getScheduler().runTaskTimerAsynchronously(this.plugin, () -> {
+            this.processQueue();
+        }, 0, 10);
     }
-    
+
     private void processQueue() {
         List<IMessage> processing = new LinkedList<IMessage>(this.queue);
         this.queue.clear();
-        
+
         processing.forEach(m -> ddp.call(Method.SENDMESSAGE.get(), new Object[] { RocketChatSerializerFactory.getMessage(m) }));
     }
-    
+
     private void stopProcessingQueue() {
-    	if(this.queueTask != null) {
-    		this.plugin.debug(false, "Stopped processing the queue.");
-    		this.queueTask.cancel();
-    		this.queueTask = null;
-    	}
+        if (this.queueTask != null) {
+            this.plugin.debug(false, "Stopped processing the queue.");
+            this.queueTask.cancel();
+            this.queueTask = null;
+        }
     }
-    
+
     @SuppressWarnings("unchecked")
     private class ConnectionAndLoginObserver extends DDPListener implements Observer {
         public void update(Observable client, Object msg) {
@@ -193,9 +193,8 @@ public class ConnectionManager {
                 Map<String, Object> jsonFields = (Map<String, Object>) msg;
                 String msgtype = (String) jsonFields.get(DDPClient.DdpMessageField.MSG);
 
-                if (msgtype == null) {
+                if (msgtype == null)
                     return;
-                }
 
                 if (msgtype.equals(DdpMessageType.ERROR)) {
                     String mErrorSource = (String) jsonFields.get(DdpMessageField.SOURCE);
@@ -205,7 +204,7 @@ public class ConnectionManager {
 
                 if (msgtype.equals(DdpMessageType.CONNECTED)) {
                     String mSessionId = (String) jsonFields.get(DdpMessageField.SESSION);
-                    
+
                     connectedInfo = new ConnectionConnectedInfo(mSessionId);
                     setConnectionState(ConnectionState.CONNECTED);
                     plugin.getLogger().info("Connected and the session id is: " + mSessionId);
@@ -241,15 +240,15 @@ public class ConnectionManager {
                 }
             }
         }
-        
+
         public void onResult(Map<String, Object> resultFields) {
             if (resultFields.containsKey("error")) {
                 Map<String, Object> error = (Map<String, Object>) resultFields.get(DdpMessageField.ERROR);
                 plugin.getLogger().severe("Failed to log into Rocket.Chat, the result came back: " + ((String) error.get("reason")));
-                
-                //The user login failed, so we just need to disconnect.
+
+                // The user login failed, so we just need to disconnect.
                 disconnectConnection();
-            }else {
+            } else {
                 Map<String, Object> result = (Map<String, Object>) resultFields.get(DdpMessageField.RESULT);
                 resumeToken = (String) result.get("token");
                 userId = (String) result.get("id");

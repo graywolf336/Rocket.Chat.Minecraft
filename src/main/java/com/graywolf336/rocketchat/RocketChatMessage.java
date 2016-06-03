@@ -5,51 +5,51 @@ import com.graywolf336.rocketchat.interfaces.IMessage;
 import com.graywolf336.rocketchat.interfaces.IRoom;
 
 public class RocketChatMessage implements IMessage {
-	private Emoji emojiIcon;
-	private String msg, iconUrl;
-	private IRoom room;
-	
-	public RocketChatMessage() {
-		this.msg = "";
-	}
-	
-	public RocketChatMessage(String message) {
-		this.msg = message;
-	}
+    private Emoji emojiIcon;
+    private String msg, iconUrl;
+    private IRoom room;
 
-	public IRoom getRoom() {
-		return this.room;
-	}
-
-	public void setRoom(IRoom room) {
-		this.room = room;
-	}
-
-	public String getIconUrl() {
-		return this.iconUrl;
-	}
-
-	public void setIconUrl(String iconUrl) {
-		this.iconUrl = iconUrl;
-	}
-
-	public Emoji getIconEmoji() {
-		return this.emojiIcon;
-	}
-
-	public void setIconEmoji(Emoji iconEmoji) {
-		this.emojiIcon = iconEmoji;
-	}
-	
-	public String getMessage() {
-		return this.msg;
-	}
-	
-    public void setMessage(String message) {
-    	this.msg = message;
+    public RocketChatMessage() {
+        this.msg = "";
     }
 
-	public boolean isValid() {
-		return !msg.isEmpty();
-	}
+    public RocketChatMessage(String message) {
+        this.msg = message;
+    }
+
+    public IRoom getRoom() {
+        return this.room;
+    }
+
+    public void setRoom(IRoom room) {
+        this.room = room;
+    }
+
+    public String getIconUrl() {
+        return this.iconUrl;
+    }
+
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
+    }
+
+    public Emoji getIconEmoji() {
+        return this.emojiIcon;
+    }
+
+    public void setIconEmoji(Emoji iconEmoji) {
+        this.emojiIcon = iconEmoji;
+    }
+
+    public String getMessage() {
+        return this.msg;
+    }
+
+    public void setMessage(String message) {
+        this.msg = message;
+    }
+
+    public boolean isValid() {
+        return !msg.isEmpty();
+    }
 }
