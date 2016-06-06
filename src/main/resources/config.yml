@@ -1,13 +1,10 @@
 system:
   debug: true
 connection:
-  host: 'chat.server.com'
+  host: 'localhost'
   port: 443
   ssl: true
-  email: 'email@example.com'
+  email: 'email@example.com - Prefers username over email'
+  username: 'rocket.cat'
   password: 'password'
-features:
-  server-updates:
-    enabled: true
-    channel: '#testing-ddp'
   
