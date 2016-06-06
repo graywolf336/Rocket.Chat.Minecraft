@@ -15,9 +15,9 @@ public class ConnectionClosedInfo {
     /**
      * Creates a new {@link ConnectionClosedInfo} instance.
      * 
-     * @param closeCode
-     * @param closeReason
-     * @param closedFromRemote
+     * @param closeCode the close code provided
+     * @param closeReason the reason the connection was closed
+     * @param closedFromRemote whether this connection was closed by the remote server or not
      */
     public ConnectionClosedInfo(int closeCode, String closeReason, boolean closedFromRemote) {
         this.closeCode = closeCode;

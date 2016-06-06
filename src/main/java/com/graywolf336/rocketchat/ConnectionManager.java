@@ -54,7 +54,7 @@ public class ConnectionManager {
     /**
      * Acquires a connection to the server, with the options provided. <strong>Runs in an asynchronous task.</strong>
      *
-     * @params timeUntilRan the amount of ticks until the task is ran
+     * @param timeUntilRan the amount of ticks until the task is ran
      * @return the instance of the {@link BukkitTask} the code is running in.
      */
     protected BukkitTask acquireConnection(long timeUntilRan) {
