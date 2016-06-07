@@ -112,6 +112,7 @@ public class ConnectionManager {
      * @param method the {@link Method} to call.
      * @param params the params to pass, can be null.
      * @param listener the {@link RocketChatCallListener}, can be null.
+     * @return the internal id associated with the call and listener
      */
     public int callMethod(Method method, Object[] params, RocketChatCallListener listener) {
         return this.ddp.call(method.get(), params, listener == null ? null : listener.toDDPListener());

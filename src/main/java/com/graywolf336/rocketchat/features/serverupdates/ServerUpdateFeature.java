@@ -7,11 +7,11 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
 import com.graywolf336.rocketchat.RocketChatClient;
-import com.graywolf336.rocketchat.interfaces.IFeature;
+import com.graywolf336.rocketchat.interfaces.Feature;
 import com.graywolf336.rocketchat.objects.RocketChatMessage;
 
-public class ServerUpdateFeature implements IFeature {
-    private static String name = "Server Updates";
+public class ServerUpdateFeature extends Feature {
+    private final static String name = "Server Updates";
     private RocketChatClient client;
 
     public ServerUpdateFeature(RocketChatClient rocketChatClient) {
@@ -56,10 +56,6 @@ public class ServerUpdateFeature implements IFeature {
         return true;
     }
 
-    public boolean onEnable(Plugin plugin) {
-        return true;
-    }
-
     public boolean onDisable(Plugin plugin) {
         if (ServerUpdateSetting.SHUTDOWN_ENABLED.asBoolean()) {
             RocketChatMessage msg = new RocketChatMessage(ServerUpdateSetting.SHUTDOWN_FORMAT.asString());
@@ -69,21 +65,13 @@ public class ServerUpdateFeature implements IFeature {
             } else if (this.client.getRoomManager().getRoomByName(ServerUpdateSetting.DEFAULTROOM.asString()).isPresent()) {
                 msg.setRoom(this.client.getRoomManager().getRoomByName(ServerUpdateSetting.DEFAULTROOM.asString()).get());
             } else {
-                logSevere("Failed to load the room for the onDisable!");
+                this.logSevere("Failed to load the room for the onDisable!");
                 return false;
             }
 
             this.client.sendMessage(msg);
         }
 
-        return true;
-    }
-
-    public boolean onSuccessfulConnection(Plugin plugin) {
-        return true;
-    }
-
-    public boolean onFailedConnection(Plugin plugin) {
         return true;
     }
 
@@ -97,7 +85,7 @@ public class ServerUpdateFeature implements IFeature {
                 } else if (this.client.getRoomManager().getRoomByName(ServerUpdateSetting.DEFAULTROOM.asString()).isPresent()) {
                     msg.setRoom(this.client.getRoomManager().getRoomByName(ServerUpdateSetting.DEFAULTROOM.asString()).get());
                 } else {
-                    logSevere("Failed to load the room for the onEnable!");
+                    this.logSevere("Failed to load the room for the onEnable!");
                     return;
                 }
 
@@ -106,17 +94,5 @@ public class ServerUpdateFeature implements IFeature {
         }
 
         return true;
-    }
-
-    private void logInfo(String message) {
-        this.client.getPlugin().getLogger().info("[" + name + "]: " + message);
-    }
-
-    private void logWarn(String message) {
-        this.client.getPlugin().getLogger().warning("[" + name + "]: " + message);
-    }
-
-    private void logSevere(String message) {
-        this.client.getPlugin().getLogger().severe("[" + name + "]: " + message);
     }
 }

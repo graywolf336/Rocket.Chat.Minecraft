@@ -1,14 +1,15 @@
 package com.graywolf336.rocketchat.interfaces;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
-public interface IFeature {
+public abstract class Feature {
     /**
      * Gets the name of the feature.
      *
      * @return name of the feature
      */
-    public String getName();
+    public abstract String getName();
 
     /**
      * Called when the Rocket.Chat plugin's onLoad method is called, is a <strong>sync</strong>.
@@ -17,7 +18,9 @@ public interface IFeature {
      * @param plugin a {@link Plugin} instance
      * @return whether this method ran successfully or not
      */
-    public boolean onLoad(Plugin plugin);
+    public boolean onLoad(Plugin plugin) {
+        return true;
+    }
 
     /**
      * Called when the Rocket.Chat plugin's onEnable method is called, is a <strong>sync</strong>.
@@ -26,7 +29,9 @@ public interface IFeature {
      * @param plugin a {@link Plugin} instance
      * @return whether this method ran successfully or not
      */
-    public boolean onEnable(Plugin plugin);
+    public boolean onEnable(Plugin plugin) {
+        return true;
+    }
 
     /**
      * Called when the Rocket.Chat plugin's onDisable method is called, is a <strong>sync</strong>.
@@ -36,7 +41,9 @@ public interface IFeature {
      * @param plugin a {@link Plugin} instance
      * @return whether this method ran successfully or not
      */
-    public boolean onDisable(Plugin plugin);
+    public boolean onDisable(Plugin plugin) {
+        return true;
+    }
 
     /**
      * Called <strong>after</strong> a connection to Rocket.Chat is <strong>successfully</strong>
@@ -45,7 +52,9 @@ public interface IFeature {
      * @param plugin a {@link Plugin} instance
      * @return whether this method ran successfully or not
      */
-    public boolean onSuccessfulConnection(Plugin plugin);
+    public boolean onSuccessfulConnection(Plugin plugin) {
+        return true;
+    }
 
     /**
      * Called <strong>after</strong> a connection to Rocket.Chat was tried and was
@@ -54,7 +63,9 @@ public interface IFeature {
      * @param plugin a {@link Plugin} instance
      * @return whether this method ran successfully or not
      */
-    public boolean onFailedConnection(Plugin plugin);
+    public boolean onFailedConnection(Plugin plugin) {
+        return true;
+    }
 
     /**
      * Called <strong>after</strong> the public channels have been loaded. This is only called
@@ -63,5 +74,19 @@ public interface IFeature {
      * @param plugin a {@link Plugin} instance
      * @return whether this method ran successfully or not
      */
-    public boolean onRoomsLoaded(Plugin plugin);
+    public boolean onRoomsLoaded(Plugin plugin) {
+        return true;
+    }
+    
+    public void logInfo(String message) {
+        Bukkit.getLogger().info("[" + this.getName() + "]: " + message);
+    }
+
+    public void logWarn(String message) {
+        Bukkit.getLogger().warning("[" + this.getName() + "]: " + message);
+    }
+
+    public void logSevere(String message) {
+        Bukkit.getLogger().severe("[" + this.getName() + "]: " + message);
+    }
 }
