@@ -50,6 +50,6 @@ public class RocketChatMessage implements IMessage {
     }
 
     public boolean isValid() {
-        return !msg.isEmpty();
+        return !this.msg.isEmpty() && this.room != null;
     }
 }

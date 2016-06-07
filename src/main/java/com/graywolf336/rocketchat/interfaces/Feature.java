@@ -1,7 +1,8 @@
 package com.graywolf336.rocketchat.interfaces;
 
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
+
+import com.graywolf336.rocketchat.RocketChatClient;
 
 public abstract class Feature {
     /**
@@ -13,12 +14,13 @@ public abstract class Feature {
 
     /**
      * Called when the Rocket.Chat plugin's onLoad method is called, is a <strong>sync</strong>.
-     * This is called <strong>before</strong> a connection to Rocket.Chat is made.
+     * This is called <strong>before</strong> a connection to Rocket.Chat is made. Your feature
+     * probably won't have this called since your plugin will need to depend on this one being loaded.
      *
-     * @param plugin a {@link Plugin} instance
+     * @param client a {@link RocketChatClient} instance
      * @return whether this method ran successfully or not
      */
-    public boolean onLoad(Plugin plugin) {
+    public boolean onLoad(RocketChatClient client) {
         return true;
     }
 
@@ -26,10 +28,10 @@ public abstract class Feature {
      * Called when the Rocket.Chat plugin's onEnable method is called, is a <strong>sync</strong>.
      * This is called <strong>before</strong> a connection to Rocket.Chat is made.
      *
-     * @param plugin a {@link Plugin} instance
+     * @param client a {@link RocketChatClient} instance
      * @return whether this method ran successfully or not
      */
-    public boolean onEnable(Plugin plugin) {
+    public boolean onEnable(RocketChatClient client) {
         return true;
     }
 
@@ -38,10 +40,10 @@ public abstract class Feature {
      * This is called when the connection is still open, <strong>if</strong> one was successfully
      * made.
      *
-     * @param plugin a {@link Plugin} instance
+     * @param client a {@link RocketChatClient} instance
      * @return whether this method ran successfully or not
      */
-    public boolean onDisable(Plugin plugin) {
+    public boolean onDisable(RocketChatClient client) {
         return true;
     }
 
@@ -49,10 +51,10 @@ public abstract class Feature {
      * Called <strong>after</strong> a connection to Rocket.Chat is <strong>successfully</strong>
      * made.
      *
-     * @param plugin a {@link Plugin} instance
+     * @param client a {@link RocketChatClient} instance
      * @return whether this method ran successfully or not
      */
-    public boolean onSuccessfulConnection(Plugin plugin) {
+    public boolean onSuccessfulConnection(RocketChatClient client) {
         return true;
     }
 
@@ -60,10 +62,10 @@ public abstract class Feature {
      * Called <strong>after</strong> a connection to Rocket.Chat was tried and was
      * <strong>failed</strong>.
      *
-     * @param plugin a {@link Plugin} instance
+     * @param client a {@link RocketChatClient} instance
      * @return whether this method ran successfully or not
      */
-    public boolean onFailedConnection(Plugin plugin) {
+    public boolean onFailedConnection(RocketChatClient client) {
         return true;
     }
 
@@ -71,10 +73,10 @@ public abstract class Feature {
      * Called <strong>after</strong> the public channels have been loaded. This is only called
      * <strong>once</strong> per server start up.
      *
-     * @param plugin a {@link Plugin} instance
+     * @param client a {@link RocketChatClient} instance
      * @return whether this method ran successfully or not
      */
-    public boolean onRoomsLoaded(Plugin plugin) {
+    public boolean onRoomsLoaded(RocketChatClient client) {
         return true;
     }
     

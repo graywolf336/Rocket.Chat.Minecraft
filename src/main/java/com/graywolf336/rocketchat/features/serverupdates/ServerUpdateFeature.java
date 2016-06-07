@@ -4,28 +4,20 @@ import java.io.File;
 import java.io.IOException;
 
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.Plugin;
 
 import com.graywolf336.rocketchat.RocketChatClient;
 import com.graywolf336.rocketchat.interfaces.Feature;
 import com.graywolf336.rocketchat.objects.RocketChatMessage;
 
 public class ServerUpdateFeature extends Feature {
-    private final static String name = "Server Updates";
-    private RocketChatClient client;
-
-    public ServerUpdateFeature(RocketChatClient rocketChatClient) {
-        this.client = rocketChatClient;
-    }
-
     public String getName() {
-        return name;
+        return "Server Updates";
     }
 
     @SuppressWarnings("deprecation")
-    public boolean onLoad(Plugin plugin) {
-        File configFile = new File(plugin.getDataFolder() + File.separator + "features", "server-updates.yml");
-        YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(plugin.getResource("features/server-updates.yml"));
+    public boolean onLoad(RocketChatClient client) {
+        File configFile = new File(client.getPlugin().getDataFolder() + File.separator + "features", "server-updates.yml");
+        YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(client.getPlugin().getResource("features/server-updates.yml"));
         boolean save = false;
 
         if (configFile.exists()) {
@@ -56,40 +48,40 @@ public class ServerUpdateFeature extends Feature {
         return true;
     }
 
-    public boolean onDisable(Plugin plugin) {
+    public boolean onDisable(RocketChatClient client) {
         if (ServerUpdateSetting.SHUTDOWN_ENABLED.asBoolean()) {
             RocketChatMessage msg = new RocketChatMessage(ServerUpdateSetting.SHUTDOWN_FORMAT.asString());
 
-            if (this.client.getRoomManager().getRoomByName(ServerUpdateSetting.SHUTDOWN_ROOM.asString()).isPresent()) {
-                msg.setRoom(this.client.getRoomManager().getRoomByName(ServerUpdateSetting.SHUTDOWN_ROOM.asString()).get());
-            } else if (this.client.getRoomManager().getRoomByName(ServerUpdateSetting.DEFAULTROOM.asString()).isPresent()) {
-                msg.setRoom(this.client.getRoomManager().getRoomByName(ServerUpdateSetting.DEFAULTROOM.asString()).get());
+            if (client.getRoomManager().getRoomByName(ServerUpdateSetting.SHUTDOWN_ROOM.asString()).isPresent()) {
+                msg.setRoom(client.getRoomManager().getRoomByName(ServerUpdateSetting.SHUTDOWN_ROOM.asString()).get());
+            } else if (client.getRoomManager().getRoomByName(ServerUpdateSetting.DEFAULTROOM.asString()).isPresent()) {
+                msg.setRoom(client.getRoomManager().getRoomByName(ServerUpdateSetting.DEFAULTROOM.asString()).get());
             } else {
                 this.logSevere("Failed to load the room for the onDisable!");
                 return false;
             }
 
-            this.client.sendMessage(msg);
+            client.sendMessage(msg);
         }
 
         return true;
     }
 
-    public boolean onRoomsLoaded(Plugin plugin) {
+    public boolean onRoomsLoaded(RocketChatClient client) {
         if (ServerUpdateSetting.STARTUP_ENABLED.asBoolean()) {
-            this.client.getPlugin().getServer().getScheduler().runTaskAsynchronously(this.client.getPlugin(), () -> {
+            client.getPlugin().getServer().getScheduler().runTaskAsynchronously(client.getPlugin(), () -> {
                 RocketChatMessage msg = new RocketChatMessage(ServerUpdateSetting.STARTUP_FORMAT.asString());
 
-                if (this.client.getRoomManager().getRoomByName(ServerUpdateSetting.STARTUP_ROOM.asString()).isPresent()) {
-                    msg.setRoom(this.client.getRoomManager().getRoomByName(ServerUpdateSetting.STARTUP_ROOM.asString()).get());
-                } else if (this.client.getRoomManager().getRoomByName(ServerUpdateSetting.DEFAULTROOM.asString()).isPresent()) {
-                    msg.setRoom(this.client.getRoomManager().getRoomByName(ServerUpdateSetting.DEFAULTROOM.asString()).get());
+                if (client.getRoomManager().getRoomByName(ServerUpdateSetting.STARTUP_ROOM.asString()).isPresent()) {
+                    msg.setRoom(client.getRoomManager().getRoomByName(ServerUpdateSetting.STARTUP_ROOM.asString()).get());
+                } else if (client.getRoomManager().getRoomByName(ServerUpdateSetting.DEFAULTROOM.asString()).isPresent()) {
+                    msg.setRoom(client.getRoomManager().getRoomByName(ServerUpdateSetting.DEFAULTROOM.asString()).get());
                 } else {
                     this.logSevere("Failed to load the room for the onEnable!");
                     return;
                 }
 
-                this.client.sendMessage(msg);
+                client.sendMessage(msg);
             });
         }
 

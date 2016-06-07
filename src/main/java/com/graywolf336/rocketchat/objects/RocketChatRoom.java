@@ -25,6 +25,10 @@ public class RocketChatRoom implements IRoom {
         this.subscription = subscriptionId;
         this.type = type;
     }
+    
+    public RocketChatRoom(String id) {
+        this._id = id;
+    }
 
     public String getId() {
         return this._id;

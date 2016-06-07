@@ -158,12 +158,12 @@ public class ConnectionManager {
                 this.plugin.getServer().getPluginManager().callEvent(new RocketChatSuccessfulLoginEvent(this.state, this.userId));
                 this.plugin.getLogger().info("Successfully logged into Rocket.Chat!");
                 this.startProcessingQueue();
-                this.plugin.getRegistry().onSuccessfulConnection(this.plugin);
+                this.plugin.getRegistry().onSuccessfulConnection(this.plugin.getRocketChatClient());
                 break;
             case CLOSED:
                 this.plugin.getServer().getPluginManager().callEvent(new RocketChatConnectionClosedEvent(this.state, this.closedInfo));
                 this.stopProcessingQueue();
-                this.plugin.getRegistry().onFailedConnection(this.plugin);
+                this.plugin.getRegistry().onFailedConnection(this.plugin.getRocketChatClient());
                 if (!weDisconnected) {
                     this.plugin.getLogger().warning("Lost connection, attempting to acquire a connection in " + this.reconnectTime + " ticks.");
                     this.acquireConnection(reconnectTime);

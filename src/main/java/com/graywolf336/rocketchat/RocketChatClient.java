@@ -25,9 +25,7 @@ public class RocketChatClient {
         return this.rooms;
     }
 
-    public void sendMessage(IMessage message) {
-        if (message.isValid()) {
-            this.conn.queueMessage(message);
-        }
+    public boolean sendMessage(IMessage message) {
+        return message.isValid() ? this.conn.queueMessage(message) : false;
     }
 }

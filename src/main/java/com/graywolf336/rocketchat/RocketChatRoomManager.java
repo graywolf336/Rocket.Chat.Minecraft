@@ -78,7 +78,7 @@ public class RocketChatRoomManager {
                     plugin.debug(false, "Loaded " + count + " channels!");
 
                     if (loadedChannels && loadedGroups && !roomsLoadedCalled) {
-                        plugin.getRegistry().onRoomsLoaded(plugin);
+                        plugin.getRegistry().onRoomsLoaded(plugin.getRocketChatClient());
                         roomsLoadedCalled = true;
                     }
                 } else {
@@ -106,7 +106,7 @@ public class RocketChatRoomManager {
                     plugin.debug(false, "Loaded " + count + " private groups!");
 
                     if (loadedChannels && loadedGroups && !roomsLoadedCalled) {
-                        plugin.getRegistry().onRoomsLoaded(plugin);
+                        plugin.getRegistry().onRoomsLoaded(plugin.getRocketChatClient());
                         roomsLoadedCalled = true;
                     }
                 } else {

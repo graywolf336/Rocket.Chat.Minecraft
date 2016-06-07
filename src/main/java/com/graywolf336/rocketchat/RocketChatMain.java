@@ -6,7 +6,7 @@ import com.graywolf336.rocketchat.enums.Settings;
 
 public class RocketChatMain extends JavaPlugin {
     private ConnectionManager connection;
-    private FeatureRegistry registry;
+    private RocketChatFeatureRegistry registry;
     private RocketChatClient client;
     private RocketChatRoomManager roomManager;
     private boolean debug;
@@ -19,18 +19,20 @@ public class RocketChatMain extends JavaPlugin {
         this.connection = new ConnectionManager(this);
         this.roomManager = new RocketChatRoomManager(this, this.connection);
         this.client = new RocketChatClient(this, this.connection, this.roomManager);
-        this.registry = new FeatureRegistry(this);
-        this.registry.onLoad(this);
+        this.registry = new RocketChatFeatureRegistry();
+        this.registry.onLoad(this.client);
+        
+        RocketChatAPI.setMain(this);
     }
 
     public void onEnable() {
         this.roomManager.registerListener();
         this.connection.acquireConnection(0);
-        this.registry.onEnable(this);
+        this.registry.onEnable(this.client);
     }
 
     public void onDisable() {
-        this.registry.onDisable(this);
+        this.registry.onDisable(this.client);
         this.connection.disconnectConnection();
     }
 
@@ -38,7 +40,7 @@ public class RocketChatMain extends JavaPlugin {
         return this.client;
     }
 
-    protected FeatureRegistry getRegistry() {
+    protected RocketChatFeatureRegistry getRegistry() {
         return this.registry;
     }
 
