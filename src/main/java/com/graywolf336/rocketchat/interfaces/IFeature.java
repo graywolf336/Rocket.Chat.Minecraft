@@ -29,7 +29,7 @@ public interface IFeature {
     public boolean onEnable(Plugin plugin);
 
     /**
-     * Called when the Rocket.Chat plugin's onEnable method is called, is a <strong>sync</strong>.
+     * Called when the Rocket.Chat plugin's onDisable method is called, is a <strong>sync</strong>.
      * This is called when the connection is still open, <strong>if</strong> one was successfully
      * made.
      *

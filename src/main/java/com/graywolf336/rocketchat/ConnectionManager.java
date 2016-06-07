@@ -1,6 +1,7 @@
 package com.graywolf336.rocketchat;
 
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -12,12 +13,15 @@ import org.bukkit.scheduler.BukkitTask;
 import com.graywolf336.rocketchat.enums.ConnectionState;
 import com.graywolf336.rocketchat.enums.Method;
 import com.graywolf336.rocketchat.enums.Settings;
+import com.graywolf336.rocketchat.enums.Subscription;
 import com.graywolf336.rocketchat.events.RocketChatConnectionClosedEvent;
 import com.graywolf336.rocketchat.events.RocketChatConnectionConnectedEvent;
 import com.graywolf336.rocketchat.events.RocketChatSuccessfulLoginEvent;
 import com.graywolf336.rocketchat.info.ConnectionClosedInfo;
 import com.graywolf336.rocketchat.info.ConnectionConnectedInfo;
 import com.graywolf336.rocketchat.interfaces.IMessage;
+import com.graywolf336.rocketchat.listeners.RocketChatCallListener;
+import com.graywolf336.rocketchat.listeners.RocketChatSubscriptionListener;
 import com.graywolf336.rocketchat.serializable.RocketChatSerializerFactory;
 import com.keysolutions.ddpclient.DDPClient;
 import com.keysolutions.ddpclient.DDPListener;
@@ -40,6 +44,8 @@ public class ConnectionManager {
 
     private BukkitTask queueTask;
     private List<IMessage> queue;
+    
+    private HashMap<String, Observer> activeSubscriptions;
 
     protected ConnectionManager(RocketChatMain plugin) {
         this.plugin = plugin;
@@ -49,6 +55,8 @@ public class ConnectionManager {
         this.weDisconnected = false;
 
         this.queue = new LinkedList<IMessage>();
+        
+        this.activeSubscriptions = new HashMap<String, Observer>();
     }
 
     /**
@@ -105,8 +113,24 @@ public class ConnectionManager {
      * @param params the params to pass, can be null.
      * @param listener the {@link RocketChatCallListener}, can be null.
      */
-    public void callMethod(Method method, Object[] params, RocketChatCallListener listener) {
-        this.ddp.call(method.get(), params, listener == null ? null : listener.toDDPListener());
+    public int callMethod(Method method, Object[] params, RocketChatCallListener listener) {
+        return this.ddp.call(method.get(), params, listener == null ? null : listener.toDDPListener());
+    }
+    
+    public int callSubscription(Subscription sub, Object[] params, RocketChatSubscriptionListener listener) {
+        int id = this.ddp.subscribe(sub.getName(), params);
+        
+        this.activeSubscriptions.put(String.valueOf(id), listener.toObserver());
+        this.ddp.addObserver(this.activeSubscriptions.get(String.valueOf(id)));
+        
+        return id;
+    }
+    
+    public void removeSubscription(int id) {
+        if(this.activeSubscriptions.containsKey(String.valueOf(id))) {
+            this.ddp.deleteObserver(this.activeSubscriptions.get(String.valueOf(id)));
+            this.activeSubscriptions.remove(String.valueOf(id));
+        }
     }
 
     /**
@@ -152,12 +176,12 @@ public class ConnectionManager {
 
     private BukkitTask attemptLogin() {
         return this.plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, () -> {
-            this.plugin.debug(false, "Attempting to log into Rocket.Chat as: " + Settings.EMAIL.asString());
-
             Object[] loginArgs = new Object[1];
             if (Settings.USERNAME.asString().isEmpty()) {
+                this.plugin.debug(false, "Attempting to log into Rocket.Chat as: " + Settings.EMAIL.asString());
                 loginArgs[0] = new EmailAuth(Settings.EMAIL.asString(), Settings.PASSWORD.asString());
             } else {
+                this.plugin.debug(false, "Attempting to log into Rocket.Chat as: " + Settings.USERNAME.asString());
                 loginArgs[0] = new UsernameAuth(Settings.USERNAME.asString(), Settings.PASSWORD.asString());
             }
             this.ddp.call(Method.LOGIN.get(), loginArgs, new ConnectionAndLoginObserver());
@@ -207,7 +231,8 @@ public class ConnectionManager {
 
                     connectedInfo = new ConnectionConnectedInfo(mSessionId);
                     setConnectionState(ConnectionState.CONNECTED);
-                    plugin.getLogger().info("Connected and the session id is: " + mSessionId);
+                    plugin.debug(false, "Connected and the session id is: " + mSessionId);
+                    return;
                 }
 
                 if (msgtype.equals(DdpMessageType.CLOSED)) {

@@ -105,6 +105,16 @@ public class FeatureRegistry {
             }
         }
     }
+    
+    /**
+     * Adds a {@link IFeature feature} to be called on the events.
+     * 
+     * @param feature the {@link IFeature} to add.
+     * @return whether it was added or not, returns false if it already exists
+     */
+    public boolean addFeature(IFeature feature) {
+        return this.features.contains(feature) ? false : this.features.add(feature);
+    }
 
     private void loadFeatures(RocketChatMain plugin) {
         this.features.add(new ServerUpdateFeature(plugin.getRocketChatClient()));

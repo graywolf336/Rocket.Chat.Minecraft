@@ -1,4 +1,4 @@
-package com.graywolf336.rocketchat;
+package com.graywolf336.rocketchat.objects;
 
 import com.graywolf336.rocketchat.enums.Emoji;
 import com.graywolf336.rocketchat.interfaces.IMessage;

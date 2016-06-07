@@ -2,7 +2,9 @@ package com.graywolf336.rocketchat.info;
 
 import java.util.Map;
 
-public class CallResultSuccessInfo {
+import com.graywolf336.rocketchat.interfaces.IDDPSuccessInfo;
+
+public class CallResultSuccessInfo implements IDDPSuccessInfo {
     private Map<String, Object> resultFields;
 
     public CallResultSuccessInfo(Map<String, Object> resultFields) {

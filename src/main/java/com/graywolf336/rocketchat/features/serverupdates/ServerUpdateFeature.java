@@ -7,8 +7,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
 import com.graywolf336.rocketchat.RocketChatClient;
-import com.graywolf336.rocketchat.RocketChatMessage;
 import com.graywolf336.rocketchat.interfaces.IFeature;
+import com.graywolf336.rocketchat.objects.RocketChatMessage;
 
 public class ServerUpdateFeature implements IFeature {
     private static String name = "Server Updates";

@@ -1,4 +1,4 @@
-package com.graywolf336.rocketchat;
+package com.graywolf336.rocketchat.listeners;
 
 import java.util.Map;
 
@@ -16,7 +16,7 @@ public class RocketChatCallListener {
         this.listener = listener;
     }
 
-    protected TheRealDDPListener toDDPListener() {
+    public DDPListener toDDPListener() {
         return new TheRealDDPListener();
     }
 

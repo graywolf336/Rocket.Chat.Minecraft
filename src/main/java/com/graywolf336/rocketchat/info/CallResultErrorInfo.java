@@ -1,6 +1,8 @@
 package com.graywolf336.rocketchat.info;
 
-public class CallResultErrorInfo {
+import com.graywolf336.rocketchat.interfaces.IDDPErrorInfo;
+
+public class CallResultErrorInfo implements IDDPErrorInfo {
     private double code;
     private String message, reason, type;
 
