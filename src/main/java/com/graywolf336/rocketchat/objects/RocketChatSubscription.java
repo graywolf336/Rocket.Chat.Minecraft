@@ -54,19 +54,18 @@ public abstract class RocketChatSubscription {
      * <p>
      * If it is still in the queue, it will be removed as well.
      *
-     * @return
+     * @return whether the subscription was existed before being removed
      */
     public boolean remove() {
-        this.client.removeSubscription(this);
+        boolean removed = this.client.removeSubscription(this);
         this.client = null;
-        return false;
+        return removed;
     }
 
     /**
      * Method which gets called when there was an error result with this subscription.
      *
      * @param errorInfo the {@link SubscriptionErrorInfo error information}
-     * @see {@link SubscriptionErrorInfo}
      */
     public abstract void gotErrorResults(SubscriptionErrorInfo errorInfo);
 
@@ -74,7 +73,6 @@ public abstract class RocketChatSubscription {
      * Method which gets called when there was a success result with this subscription.
      *
      * @param updateInfo the {@link SubscriptionUpdateInfo update information}
-     * @see {@link SubscriptionUpdateInfo}
      */
     public abstract void gotSuccessResults(SubscriptionUpdateInfo updateInfo);
 

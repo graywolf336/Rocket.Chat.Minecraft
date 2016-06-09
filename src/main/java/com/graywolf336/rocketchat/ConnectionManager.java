@@ -225,7 +225,7 @@ public class ConnectionManager {
      * The subscription is not active until the queue is processed, so there is a 10 tick delay (0.5 second).
      * It will not add add duplicate subscriptions.
      * 
-     * @param subscription
+     * @param subscription the {@link RocketChatSubscription} to queue up
      * @return whether the subscription was added or not
      */
     protected boolean queueSubscription(RocketChatSubscription subscription) {

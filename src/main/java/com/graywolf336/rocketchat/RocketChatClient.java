@@ -82,7 +82,7 @@ public class RocketChatClient {
      * Removes a {@link RocketChatSubscription} from the internal system (queue and active), returns
      * false if it didn't exist.
      *
-     * @param id the id of the subscription to remove
+     * @param subscription the subscription to remove
      * @return whether there was a subscription removed by that id or not
      */
     public boolean removeSubscription(RocketChatSubscription subscription) {
