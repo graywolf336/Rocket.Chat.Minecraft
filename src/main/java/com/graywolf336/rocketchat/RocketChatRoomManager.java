@@ -11,13 +11,13 @@ import org.bukkit.event.Listener;
 import com.google.gson.internal.LinkedTreeMap;
 import com.graywolf336.rocketchat.enums.Method;
 import com.graywolf336.rocketchat.enums.RoomType;
-import com.graywolf336.rocketchat.enums.Subscription;
 import com.graywolf336.rocketchat.events.RocketChatSuccessfulLoginEvent;
+import com.graywolf336.rocketchat.info.SubscriptionErrorInfo;
 import com.graywolf336.rocketchat.info.SubscriptionUpdateInfo;
 import com.graywolf336.rocketchat.interfaces.IRoom;
 import com.graywolf336.rocketchat.listeners.RocketChatCallListener;
-import com.graywolf336.rocketchat.listeners.RocketChatSubscriptionListener;
 import com.graywolf336.rocketchat.objects.RocketChatRoom;
+import com.graywolf336.rocketchat.objects.RocketChatSubscription;
 
 public class RocketChatRoomManager {
     private RocketChatMain plugin;
@@ -32,6 +32,12 @@ public class RocketChatRoomManager {
         this.loadedChannels = false;
         this.loadedGroups = false;
         this.roomsLoadedCalled = false;
+        
+        this.conn.queueSubscription(new RocketChatRoomSubscription(this.plugin.getRocketChatClient()));
+    }
+
+    public boolean haveRoomsBeenLoaded() {
+        return this.loadedChannels && this.loadedGroups && this.roomsLoadedCalled;
     }
 
     public Optional<IRoom> getRoomById(String id) {
@@ -113,52 +119,65 @@ public class RocketChatRoomManager {
                     plugin.getLogger().severe("Failed to load the private groups!! '" + error.toString() + "'");
                 }
             }));
+        }
+    }
+    
+    private class RocketChatRoomSubscription extends RocketChatSubscription {
+        public RocketChatRoomSubscription(RocketChatClient client) {
+            super(client);
+        }
 
-            conn.callSubscription(Subscription.SUBSCRIPTIONS, null, new RocketChatSubscriptionListener(Subscription.SUBSCRIPTIONS, (error, result) -> {
-                if (error == null) {
-                    SubscriptionUpdateInfo info = (SubscriptionUpdateInfo) result;
-                    LinkedTreeMap<?, ?> item = (LinkedTreeMap<?, ?>) info.getFields().get("fields");
+        public String getName() {
+            return "subscription";
+        }
 
-                    switch (info.getUpdateType()) {
-                        case ADDED:
-                            String rid = (String) item.get("rid");
+        public String getCollection() {
+            return "rocketchat_subscription";
+        }
 
-                            Optional<IRoom> aRoom = getRoomById(rid);
-                            if (aRoom.isPresent()) {
-                                aRoom.get().setSubscriptionId(info.getId());
-                            } else {
-                                String name = (String) item.get("name");
-                                RoomType type = RoomType.getByLetter((String) item.get("t"));
+        public void gotErrorResults(SubscriptionErrorInfo error) {
+            plugin.getLogger().severe("Error orrured while an update in a subscription: '" + error.toString() + "'");
+        }
 
-                                rooms.add(new RocketChatRoom(rid, name, info.getId(), type));
-                            }
-                            break;
-                        case CHANGED:
-                            plugin.debug(false, "RoomManager: " + item.toString());
-                            Optional<IRoom> cRoom = getRoomBySubscriptionId(info.getId());
-                            if (cRoom.isPresent()) {
-                                if (item.containsKey("t")) {
-                                    cRoom.get().setType(RoomType.getByLetter((String) item.get("t")));
-                                }
+        public void gotSuccessResults(SubscriptionUpdateInfo info) {
+            LinkedTreeMap<?, ?> item = (LinkedTreeMap<?, ?>) info.getFields().get("fields");
 
-                                if (item.containsKey("name")) {
-                                    cRoom.get().setName((String) item.get("name"));
-                                }
-                            }
-                            break;
-                        case REMOVED:
-                            Optional<IRoom> rRoom = getRoomBySubscriptionId(info.getId());
-                            if (rRoom.isPresent() && rRoom.get().getType() != RoomType.CHANNEL) {
-                                rooms.remove(rRoom.get());
-                            }
-                            break;
-                        default:
-                            break;
+            switch (info.getUpdateType()) {
+                case ADDED:
+                    String rid = (String) item.get("rid");
+
+                    Optional<IRoom> aRoom = getRoomById(rid);
+                    if (aRoom.isPresent()) {
+                        aRoom.get().setSubscriptionId(info.getId());
+                    } else {
+                        String name = (String) item.get("name");
+                        RoomType type = RoomType.getByLetter((String) item.get("t"));
+
+                        rooms.add(new RocketChatRoom(rid, name, info.getId(), type));
                     }
-                } else {
-                    plugin.getLogger().severe("Error orrured while an update in a subscription: '" + error.toString() + "'");
-                }
-            }));
+                    break;
+                case CHANGED:
+                    plugin.debug(false, "RoomManager: " + item.toString());
+                    Optional<IRoom> cRoom = getRoomBySubscriptionId(info.getId());
+                    if (cRoom.isPresent()) {
+                        if (item.containsKey("t")) {
+                            cRoom.get().setType(RoomType.getByLetter((String) item.get("t")));
+                        }
+
+                        if (item.containsKey("name")) {
+                            cRoom.get().setName((String) item.get("name"));
+                        }
+                    }
+                    break;
+                case REMOVED:
+                    Optional<IRoom> rRoom = getRoomBySubscriptionId(info.getId());
+                    if (rRoom.isPresent() && rRoom.get().getType() != RoomType.CHANNEL) {
+                        rooms.remove(rRoom.get());
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
