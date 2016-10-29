@@ -4,6 +4,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.graywolf336.rocketchat.enums.Settings;
 
+/**
+ * The {@link JavaPlugin} class for the Rocket.Chat plugin.
+ *
+ * @author graywolf336
+ * @since 1.0.0
+ * @version 1.0.0
+ */
 public class RocketChatMain extends JavaPlugin {
     private ConnectionManager connection;
     private RocketChatFeatureRegistry registry;
@@ -21,7 +28,7 @@ public class RocketChatMain extends JavaPlugin {
         this.client = new RocketChatClient(this, this.connection, this.roomManager);
         this.registry = new RocketChatFeatureRegistry();
         this.registry.onLoad(this.client);
-        
+
         RocketChatAPI.setMain(this);
     }
 
@@ -34,12 +41,28 @@ public class RocketChatMain extends JavaPlugin {
     public void onDisable() {
         this.registry.onDisable(this.client);
         this.connection.disconnectConnection();
+        
+        RocketChatAPI.setMain(null);
+        this.registry = null;
+        this.client = null;
+        this.roomManager = null;
+        this.connection = null;
     }
 
+    /**
+     * Gets the instance of the {@link RocketChatClient} to use.
+     *
+     * @return a valid {@link RocketChatClient} instance
+     */
     public RocketChatClient getRocketChatClient() {
         return this.client;
     }
 
+    /**
+     * Gets the instance of the {@link RocketChatFeatureRegistry} to use.
+     *
+     * @return a valid {@link RocketChatFeatureRegistry} instance
+     */
     protected RocketChatFeatureRegistry getRegistry() {
         return this.registry;
     }

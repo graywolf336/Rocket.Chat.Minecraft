@@ -16,7 +16,7 @@ public class RocketChatCallListener {
         this.listener = listener;
     }
 
-    public DDPListener toDDPListener() {
+    public TheRealDDPListener toDDPListener() {
         return new TheRealDDPListener();
     }
 
