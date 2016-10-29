@@ -1,7 +1,6 @@
 package com.graywolf336.rocketchat;
 
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +12,6 @@ import org.bukkit.scheduler.BukkitTask;
 import com.graywolf336.rocketchat.enums.ConnectionState;
 import com.graywolf336.rocketchat.enums.Method;
 import com.graywolf336.rocketchat.enums.Settings;
-import com.graywolf336.rocketchat.enums.Subscription;
 import com.graywolf336.rocketchat.events.RocketChatConnectionClosedEvent;
 import com.graywolf336.rocketchat.events.RocketChatConnectionConnectedEvent;
 import com.graywolf336.rocketchat.events.RocketChatSuccessfulLoginEvent;
@@ -21,7 +19,7 @@ import com.graywolf336.rocketchat.info.ConnectionClosedInfo;
 import com.graywolf336.rocketchat.info.ConnectionConnectedInfo;
 import com.graywolf336.rocketchat.interfaces.IMessage;
 import com.graywolf336.rocketchat.listeners.RocketChatCallListener;
-import com.graywolf336.rocketchat.listeners.RocketChatSubscriptionListener;
+import com.graywolf336.rocketchat.objects.RocketChatSubscription;
 import com.graywolf336.rocketchat.serializable.RocketChatSerializerFactory;
 import com.keysolutions.ddpclient.DDPClient;
 import com.keysolutions.ddpclient.DDPListener;
@@ -30,6 +28,17 @@ import com.keysolutions.ddpclient.UsernameAuth;
 import com.keysolutions.ddpclient.DDPClient.DdpMessageField;
 import com.keysolutions.ddpclient.DDPClient.DdpMessageType;
 
+/**
+ * Handles all of the connection related items, including connecting, calling methods, subscribing,
+ * and sending messages.
+ * <p>
+ * There should really only be one instance of this, or else multiple events will probably be called
+ * when we expect only one.
+ *
+ * @author graywolf336
+ * @since 1.0.0
+ * @version 1.0.0
+ */
 public class ConnectionManager {
     private RocketChatMain plugin;
     private DDPClient ddp;
@@ -43,9 +52,8 @@ public class ConnectionManager {
     private ConnectionClosedInfo closedInfo;
 
     private BukkitTask queueTask;
-    private List<IMessage> queue;
-    
-    private HashMap<String, Observer> activeSubscriptions;
+    private List<IMessage> messageQueue;
+    private List<RocketChatSubscription> subscriptionQueue, activeSubscriptions;
 
     protected ConnectionManager(RocketChatMain plugin) {
         this.plugin = plugin;
@@ -54,13 +62,24 @@ public class ConnectionManager {
         this.reconnectTime = 10;
         this.weDisconnected = false;
 
-        this.queue = new LinkedList<IMessage>();
+        this.messageQueue = new LinkedList<IMessage>();
         
-        this.activeSubscriptions = new HashMap<String, Observer>();
+        this.subscriptionQueue = new LinkedList<RocketChatSubscription>();
+        this.activeSubscriptions = new LinkedList<RocketChatSubscription>();
+    }
+    
+    /**
+     * Gets the current state of the connection.
+     *
+     * @return the {@link ConnectionState state of the connection}
+     */
+    public ConnectionState getConnectionState() {
+        return this.state;
     }
 
     /**
-     * Acquires a connection to the server, with the options provided. <strong>Runs in an asynchronous task.</strong>
+     * Acquires a connection to the server, with the options provided. <strong>Runs in an
+     * asynchronous task.</strong>
      *
      * @param timeUntilRan the amount of ticks until the task is ran
      * @return the instance of the {@link BukkitTask} the code is running in.
@@ -86,7 +105,7 @@ public class ConnectionManager {
     /** Disconnects from the Rocket.Chat server, without reconnecting. */
     protected void disconnectConnection() {
         // Finish processing the queue
-        this.processQueue();
+        this.processMessageQueue();
 
         // Is this even required? Does it even get called?
         if (!this.resumeToken.isEmpty()) {
@@ -95,53 +114,6 @@ public class ConnectionManager {
 
         this.weDisconnected = true;
         this.ddp.disconnect();
-    }
-
-    /**
-     * Gets the current state of the connection.
-     *
-     * @return the {@link ConnectionState state of the connection}
-     */
-    public ConnectionState getConnectionState() {
-        return this.state;
-    }
-
-    /**
-     * Calls the given method to the Rocket.Chat server.
-     *
-     * @param method the {@link Method} to call.
-     * @param params the params to pass, can be null.
-     * @param listener the {@link RocketChatCallListener}, can be null.
-     * @return the internal id associated with the call and listener
-     */
-    public int callMethod(Method method, Object[] params, RocketChatCallListener listener) {
-        return this.ddp.call(method.get(), params, listener == null ? null : listener.toDDPListener());
-    }
-    
-    public int callSubscription(Subscription sub, Object[] params, RocketChatSubscriptionListener listener) {
-        int id = this.ddp.subscribe(sub.getName(), params);
-        
-        this.activeSubscriptions.put(String.valueOf(id), listener.toObserver());
-        this.ddp.addObserver(this.activeSubscriptions.get(String.valueOf(id)));
-        
-        return id;
-    }
-    
-    public void removeSubscription(int id) {
-        if(this.activeSubscriptions.containsKey(String.valueOf(id))) {
-            this.ddp.deleteObserver(this.activeSubscriptions.get(String.valueOf(id)));
-            this.activeSubscriptions.remove(String.valueOf(id));
-        }
-    }
-
-    /**
-     * Adds a message to the queue. The queue is processed twice a second.
-     *
-     * @param message the {@link IMessage} to queue
-     * @return whether it was added to the queue or not
-     */
-    public boolean queueMessage(IMessage message) {
-        return this.queue.add(message);
     }
 
     private void setConnectionState(ConnectionState state) {
@@ -194,13 +166,25 @@ public class ConnectionManager {
     private void startProcessingQueue() {
         this.plugin.debug(false, "Started processing the queue.");
         this.queueTask = this.plugin.getServer().getScheduler().runTaskTimerAsynchronously(this.plugin, () -> {
-            this.processQueue();
+            this.processSubscriptionQueue();
+            this.processMessageQueue();
         }, 0, 10);
     }
+    
+    private void processSubscriptionQueue() {
+        List<RocketChatSubscription> processing = new LinkedList<RocketChatSubscription>(this.subscriptionQueue);
+        this.subscriptionQueue.clear();
+        
+        processing.forEach(s -> {
+            this.ddp.subscribe(s.getName(), s.getParams());
+            this.ddp.addObserver(s.getObserver());
+            this.activeSubscriptions.add(s);
+        });
+    }
 
-    private void processQueue() {
-        List<IMessage> processing = new LinkedList<IMessage>(this.queue);
-        this.queue.clear();
+    private void processMessageQueue() {
+        List<IMessage> processing = new LinkedList<IMessage>(this.messageQueue);
+        this.messageQueue.clear();
 
         processing.forEach(m -> ddp.call(Method.SENDMESSAGE.get(), new Object[] { RocketChatSerializerFactory.getMessage(m) }));
     }
@@ -212,12 +196,63 @@ public class ConnectionManager {
             this.queueTask = null;
         }
     }
-    
+
     private void setUserOnlineStatus(boolean online) {
         Object[] params = new Object[1];
         params[0] = online ? "online": "offline";
         
         this.callMethod(Method.ONLINESTATUS, params, null);
+    }
+    
+    //TODO: Queue up methods to be called if the connection isn't active
+    protected int callMethod(Method method, Object[] params, RocketChatCallListener listener) {
+        return this.ddp.call(method.get(), params, listener == null ? null : listener.toDDPListener());
+    }
+
+    /**
+     * Removes a subscription from the system, will remove it from the active or queued subscription lists.
+     * 
+     * @param subscription the {@link RocketChatSubscription} to remove
+     * @return whether it was removed or not, false indicates it didn't exist
+     */
+    protected boolean removeSubscription(RocketChatSubscription subscription) {
+        if(this.activeSubscriptions.contains(subscription)) {
+            this.ddp.deleteObserver(subscription.getObserver());
+            this.activeSubscriptions.remove(subscription);
+            return true;
+        } else if(this.subscriptionQueue.contains(subscription)) {
+            this.subscriptionQueue.remove(subscription);
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Adds a {@link RocketChatSubscription} to the queue. This queue is process twice a second.
+     * <p>
+     * The subscription is not active until the queue is processed, so there is a 10 tick delay (0.5 second).
+     * It will not add add duplicate subscriptions.
+     * 
+     * @param subscription the {@link RocketChatSubscription} to queue up
+     * @return whether the subscription was added or not
+     */
+    protected boolean queueSubscription(RocketChatSubscription subscription) {
+        if(!this.subscriptionQueue.contains(subscription) && !this.activeSubscriptions.contains(subscription)) {
+            return this.subscriptionQueue.add(subscription);
+        }
+        
+        return false;
+    }
+
+    /**
+     * Adds a message to the queue. The queue is processed twice a second.
+     *
+     * @param message the {@link IMessage} to queue
+     * @return whether it was added to the queue or not
+     */
+    protected boolean queueMessage(IMessage message) {
+        return this.messageQueue.add(message);
     }
 
     @SuppressWarnings("unchecked")

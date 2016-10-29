@@ -6,6 +6,13 @@ import java.util.List;
 import com.graywolf336.rocketchat.features.serverupdates.ServerUpdateFeature;
 import com.graywolf336.rocketchat.interfaces.Feature;
 
+/**
+ * The Feature Registry for the Rocket.Chat plugin.
+ *
+ * @author graywolf336
+ * @since 1.0.0
+ * @version 1.0.0
+ */
 public class RocketChatFeatureRegistry {
     private List<Feature> features;
 
@@ -14,7 +21,7 @@ public class RocketChatFeatureRegistry {
         this.loadFeatures();
     }
 
-    public void onLoad(RocketChatClient client) {
+    protected void onLoad(RocketChatClient client) {
         for (Feature feature : features) {
             try {
                 if (feature.onLoad(client)) {
@@ -29,7 +36,7 @@ public class RocketChatFeatureRegistry {
         }
     }
 
-    public void onEnable(RocketChatClient client) {
+    protected void onEnable(RocketChatClient client) {
         for (Feature feature : features) {
             try {
                 if (feature.onEnable(client)) {
@@ -44,7 +51,7 @@ public class RocketChatFeatureRegistry {
         }
     }
 
-    public void onDisable(RocketChatClient client) {
+    protected void onDisable(RocketChatClient client) {
         for (Feature feature : features) {
             try {
                 if (feature.onDisable(client)) {
@@ -59,7 +66,7 @@ public class RocketChatFeatureRegistry {
         }
     }
 
-    public void onSuccessfulConnection(RocketChatClient client) {
+    protected void onSuccessfulConnection(RocketChatClient client) {
         for (Feature feature : features) {
             try {
                 if (feature.onSuccessfulConnection(client)) {
@@ -74,7 +81,7 @@ public class RocketChatFeatureRegistry {
         }
     }
 
-    public void onFailedConnection(RocketChatClient client) {
+    protected void onFailedConnection(RocketChatClient client) {
         for (Feature feature : features) {
             try {
                 if (feature.onFailedConnection(client)) {
@@ -89,7 +96,7 @@ public class RocketChatFeatureRegistry {
         }
     }
 
-    public void onRoomsLoaded(RocketChatClient client) {
+    protected void onRoomsLoaded(RocketChatClient client) {
         for (Feature feature : features) {
             try {
                 if (feature.onRoomsLoaded(client)) {
@@ -103,15 +110,24 @@ public class RocketChatFeatureRegistry {
             }
         }
     }
-    
+
     /**
      * Adds a {@link Feature feature} to be called on the events.
-     * 
+     *
      * @param feature the {@link Feature} to add.
      * @return whether it was added or not, returns false if it already exists
      */
     public boolean addFeature(Feature feature) {
         return this.features.contains(feature) ? false : this.features.add(feature);
+    }
+
+    /**
+     * Gets a list of all the {@link Feature}s loaded.
+     * 
+     * @return the list of {@link Feature features}
+     */
+    public List<Feature> getFeatures() {
+        return this.features;
     }
 
     private void loadFeatures() {
