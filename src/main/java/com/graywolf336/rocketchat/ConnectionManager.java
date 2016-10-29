@@ -158,10 +158,12 @@ public class ConnectionManager {
                 this.plugin.getServer().getPluginManager().callEvent(new RocketChatSuccessfulLoginEvent(this.state, this.userId));
                 this.plugin.getLogger().info("Successfully logged into Rocket.Chat!");
                 this.startProcessingQueue();
+                this.setUserOnlineStatus(true);
                 this.plugin.getRegistry().onSuccessfulConnection(this.plugin.getRocketChatClient());
                 break;
             case CLOSED:
                 this.plugin.getServer().getPluginManager().callEvent(new RocketChatConnectionClosedEvent(this.state, this.closedInfo));
+                this.setUserOnlineStatus(false);
                 this.stopProcessingQueue();
                 this.plugin.getRegistry().onFailedConnection(this.plugin.getRocketChatClient());
                 if (!weDisconnected) {
@@ -209,6 +211,13 @@ public class ConnectionManager {
             this.queueTask.cancel();
             this.queueTask = null;
         }
+    }
+    
+    private void setUserOnlineStatus(boolean online) {
+        Object[] params = new Object[1];
+        params[0] = online ? "online": "offline";
+        
+        this.callMethod(Method.ONLINESTATUS, params, null);
     }
 
     @SuppressWarnings("unchecked")
