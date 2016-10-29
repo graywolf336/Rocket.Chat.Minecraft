@@ -8,15 +8,15 @@ public class RocketChatRoom implements IRoom {
     private String _id, name, subscription;
     private RoomType type;
     
-    public RocketChatRoom(Object room, RoomType type) throws Exception {
+    public RocketChatRoom(Object room) throws Exception {
         if (room instanceof LinkedTreeMap) {
             LinkedTreeMap<?, ?> r = (LinkedTreeMap<?, ?>) room;
             this._id = (String) r.get("_id");
             this.name = (String) r.get("name");
-        } else
+            this.type = RoomType.getByLetter((String) r.get("t"));
+        } else {
             throw new Exception("Invalid room object type!");
-
-        this.type = type;
+        }
     }
 
     public RocketChatRoom(String id, String name, String subscriptionId, RoomType type) {

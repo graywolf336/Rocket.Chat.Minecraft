@@ -2,9 +2,9 @@ package com.graywolf336.rocketchat.enums;
 
 public enum Method {
 	CHANNELLIST("channelsList"),
-	GROUPLIST("groupsList"),
     LOGIN("login"),
     LOGOUT("logout"),
+    ONLINESTATUS("UserPresence:setDefaultStatus"),
     SENDMESSAGE("sendMessage");
     
     private String method;
