@@ -66,6 +66,10 @@ public class ServerUpdateFeature extends Feature {
 
         return true;
     }
+    
+    public boolean onReload(RocketChatClient client) {
+        return this.onLoad(client);
+    }
 
     public boolean onRoomsLoaded(RocketChatClient client) {
         if (ServerUpdateSetting.STARTUP_ENABLED.asBoolean()) {

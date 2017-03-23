@@ -79,27 +79,36 @@ public class ConnectionManager {
 
     /**
      * Acquires a connection to the server, with the options provided. <strong>Runs in an
-     * asynchronous task.</strong>
+     * asynchronous task unless the time is -1.</strong>
      *
-     * @param timeUntilRan the amount of ticks until the task is ran
+     * @param timeUntilRun the amount of ticks until the task is ran
      * @return the instance of the {@link BukkitTask} the code is running in.
      */
-    protected BukkitTask acquireConnection(long timeUntilRan) {
+    protected BukkitTask acquireConnection(long timeUntilRun) {
         this.weDisconnected = false;
         this.connectedInfo = null;
         this.closedInfo = null;
 
-        return this.plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, () -> {
-            try {
-                this.ddp = new DDPClient(Settings.HOST.asString(), Settings.PORT.asInt(), Settings.SSL.asBoolean());
-                this.ddp.addObserver(new ConnectionAndLoginObserver());
-                this.ddp.connect();
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-                this.setConnectionState(ConnectionState.ERROR);
-                this.plugin.getLogger().severe("The host connection string is not valid URI syntax.");
-            }
-        }, timeUntilRan);
+        if (timeUntilRun == -1) {
+            this.tryToConnect();
+            return null;
+        } else {
+            return this.plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, () -> {
+                this.tryToConnect();
+            }, timeUntilRun);
+        }
+    }
+    
+    private void tryToConnect() {
+        try {
+            this.ddp = new DDPClient(Settings.HOST.asString(), Settings.PORT.asInt(), Settings.SSL.asBoolean());
+            this.ddp.addObserver(new ConnectionAndLoginObserver());
+            this.ddp.connect();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            this.setConnectionState(ConnectionState.ERROR);
+            this.plugin.getLogger().severe("The host connection string is not valid URI syntax.");
+        }
     }
 
     /** Disconnects from the Rocket.Chat server, without reconnecting. */
@@ -112,6 +121,7 @@ public class ConnectionManager {
             this.ddp.call(Method.LOGOUT.get(), null);
         }
 
+        this.state = ConnectionState.CLOSED;
         this.weDisconnected = true;
         this.ddp.disconnect();
     }

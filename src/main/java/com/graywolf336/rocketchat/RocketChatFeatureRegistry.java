@@ -65,6 +65,21 @@ public class RocketChatFeatureRegistry {
             }
         }
     }
+    
+    protected void onReload(RocketChatClient client) {
+        for (Feature feature : features) {
+            try {
+                if (feature.onReload(client)) {
+                    client.getPlugin().getLogger().info("Successfully called the onReload for '" + feature.getName() + "'.");
+                } else {
+                    client.getPlugin().getLogger().warning("OnReload failed to be successful for '" + feature.getName() + "'.");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                client.getPlugin().getLogger().severe("The onReload for '" + feature.getName() + "' threw an exception! See the above.");
+            }
+        }
+    }
 
     protected void onSuccessfulConnection(RocketChatClient client) {
         for (Feature feature : features) {

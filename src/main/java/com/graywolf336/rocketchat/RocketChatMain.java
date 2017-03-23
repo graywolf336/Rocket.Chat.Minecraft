@@ -2,6 +2,7 @@ package com.graywolf336.rocketchat;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.graywolf336.rocketchat.commands.RocketChatReloadCommand;
 import com.graywolf336.rocketchat.enums.Settings;
 
 /**
@@ -33,6 +34,7 @@ public class RocketChatMain extends JavaPlugin {
     }
 
     public void onEnable() {
+        this.registerCommands();
         this.roomManager.registerListener();
         this.connection.acquireConnection(0);
         this.registry.onEnable(this.client);
@@ -47,6 +49,17 @@ public class RocketChatMain extends JavaPlugin {
         this.client = null;
         this.roomManager = null;
         this.connection = null;
+    }
+    
+    public void reloadEverything() {
+        this.reloadConfig();
+        this.connection.disconnectConnection();
+        this.connection.acquireConnection(-1);
+        this.registry.onReload(client);
+    }
+    
+    private void registerCommands() {
+        this.getCommand("rocketchatreload").setExecutor(new RocketChatReloadCommand(this));
     }
 
     /**
