@@ -2,3 +2,9 @@ name: Rocket.Chat
 main: com.graywolf336.rocketchat.RocketChatMain
 version: maven-version-number
 authors: [graywolf336]
+commands:
+  rocketchatreload:
+    description: Reloads the configuration and connections.
+permissions:
+  rocketchat.reload:
+    default: op

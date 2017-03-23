@@ -24,14 +24,14 @@
 		<dependency>
 			<groupId>org.bukkit</groupId>
 			<artifactId>bukkit</artifactId>
-			<version>1.9-R0.1-SNAPSHOT</version>
+			<version>1.11.2-R0.1-SNAPSHOT</version>
 			<type>jar</type>
 		</dependency>
 
 		<dependency>
 			<groupId>com.keysolutions</groupId>
 			<artifactId>java-ddp-client</artifactId>
-			<version>1.0.0.3</version>
+			<version>1.0.0.5</version>
 			<type>jar</type>
 		</dependency>
 	</dependencies>

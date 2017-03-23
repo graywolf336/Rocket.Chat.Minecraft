@@ -46,6 +46,17 @@ public abstract class Feature {
     public boolean onDisable(RocketChatClient client) {
         return true;
     }
+    
+    /**
+     * Called when the Rocket.Chat plugin was reloaded via the `/rocketchatreload command and it is <strong>sync</strong>.
+     * This is called after the internals have completed after the reload, no good connection is promised.
+     * 
+     * @param client a {@link RocketChatClient} instance
+     * @return whether this method ran successfully or not
+     */
+    public boolean onReload(RocketChatClient client) {
+        return true;
+    }
 
     /**
      * Called <strong>after</strong> a connection to Rocket.Chat is <strong>successfully</strong>
