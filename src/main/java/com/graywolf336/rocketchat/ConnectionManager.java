@@ -167,7 +167,7 @@ public class ConnectionManager {
                 loginArgs[0] = new RocketChatAuthModel("", Settings.PASSWORD.asString(), RocketChatAuthModel.RocketChatAuthMethod.TOKEN);
             } else if (Settings.USERNAME.asString().isEmpty()) {
                 this.plugin.debug(false, "Attempting to log into Rocket.Chat as: " + Settings.EMAIL.asString());
-                loginArgs[0] = new RocketChatAuthModel(Settings.EMAIL   .asString(), Settings.PASSWORD.asString(), RocketChatAuthModel.RocketChatAuthMethod.USERNAME);
+                loginArgs[0] = new RocketChatAuthModel(Settings.EMAIL.asString(), Settings.PASSWORD.asString(), RocketChatAuthModel.RocketChatAuthMethod.USERNAME);
             } else {
                 this.plugin.debug(false, "Attempting to log into Rocket.Chat as: " + Settings.USERNAME.asString());
                 loginArgs[0] = new RocketChatAuthModel(Settings.USERNAME.asString(), Settings.PASSWORD.asString(), RocketChatAuthModel.RocketChatAuthMethod.USERNAME);
