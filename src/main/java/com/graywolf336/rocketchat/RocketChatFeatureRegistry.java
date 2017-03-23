@@ -3,6 +3,8 @@ package com.graywolf336.rocketchat;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.graywolf336.rocketchat.features.basicchat.BasicChatFeature;
+import com.graywolf336.rocketchat.features.joinAndLeaves.JoinAndLeavesFeature;
 import com.graywolf336.rocketchat.features.serverupdates.ServerUpdateFeature;
 import com.graywolf336.rocketchat.interfaces.Feature;
 
@@ -147,5 +149,7 @@ public class RocketChatFeatureRegistry {
 
     private void loadFeatures() {
         this.features.add(new ServerUpdateFeature());
+        this.features.add(new BasicChatFeature());
+        this.features.add(new JoinAndLeavesFeature());
     }
 }

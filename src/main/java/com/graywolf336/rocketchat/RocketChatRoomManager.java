@@ -46,6 +46,12 @@ public class RocketChatRoomManager {
     public Optional<IRoom> getRoomByName(String name) {
         return this.rooms.stream().filter(r -> r.getName().equalsIgnoreCase(name.replace("#", ""))).findFirst();
     }
+    
+    public Optional<IRoom> getRoomByIdOrName(String idOrName) {
+        String toFindBy = idOrName.replace("#", "");
+        
+        return this.rooms.stream().filter(r -> r.getId().equalsIgnoreCase(toFindBy) || r.getName().equalsIgnoreCase(toFindBy)).findFirst();
+    }
 
     public Optional<IRoom> getRoomBySubscriptionId(String subId) {
         return this.rooms.stream().filter(r -> r.getSubscriptionId().equalsIgnoreCase(subId)).findFirst();

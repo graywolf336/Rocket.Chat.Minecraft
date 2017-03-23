@@ -7,9 +7,9 @@ public interface IMessage {
 
     public void setRoom(IRoom room);
 
-    public String getIconUrl();
+    public String getAvatar();
 
-    public void setIconUrl(String iconUrl);
+    public void setAvatar(String avatar);
 
     public Emoji getIconEmoji();
 
@@ -18,6 +18,18 @@ public interface IMessage {
     public String getMessage();
 
     public void setMessage(String message);
+    
+    public void setAlias(String alias);
+    
+    public String getAlias();
+    
+    public void setGroupable(boolean groupable);
+    
+    public boolean isGroupable();
+    
+    public void setParseUrls(boolean parse);
+    
+    public boolean willParseUrls();
 
     public boolean isValid();
 }
