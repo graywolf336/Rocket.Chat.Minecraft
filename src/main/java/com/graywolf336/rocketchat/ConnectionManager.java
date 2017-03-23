@@ -1,5 +1,6 @@
 package com.graywolf336.rocketchat;
 
+import java.lang.reflect.Modifier;
 import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Observer;
 
 import org.bukkit.scheduler.BukkitTask;
 
+import com.google.gson.GsonBuilder;
 import com.graywolf336.rocketchat.enums.ConnectionState;
 import com.graywolf336.rocketchat.enums.Method;
 import com.graywolf336.rocketchat.enums.Settings;
@@ -17,14 +19,12 @@ import com.graywolf336.rocketchat.events.RocketChatConnectionConnectedEvent;
 import com.graywolf336.rocketchat.events.RocketChatSuccessfulLoginEvent;
 import com.graywolf336.rocketchat.info.ConnectionClosedInfo;
 import com.graywolf336.rocketchat.info.ConnectionConnectedInfo;
-import com.graywolf336.rocketchat.interfaces.IMessage;
 import com.graywolf336.rocketchat.listeners.RocketChatCallListener;
+import com.graywolf336.rocketchat.objects.RocketChatAuthModel;
+import com.graywolf336.rocketchat.objects.RocketChatMessage;
 import com.graywolf336.rocketchat.objects.RocketChatSubscription;
-import com.graywolf336.rocketchat.serializable.RocketChatSerializerFactory;
 import com.keysolutions.ddpclient.DDPClient;
 import com.keysolutions.ddpclient.DDPListener;
-import com.keysolutions.ddpclient.EmailAuth;
-import com.keysolutions.ddpclient.UsernameAuth;
 import com.keysolutions.ddpclient.DDPClient.DdpMessageField;
 import com.keysolutions.ddpclient.DDPClient.DdpMessageType;
 
@@ -52,7 +52,7 @@ public class ConnectionManager {
     private ConnectionClosedInfo closedInfo;
 
     private BukkitTask queueTask;
-    private List<IMessage> messageQueue;
+    private List<RocketChatMessage> messageQueue;
     private List<RocketChatSubscription> subscriptionQueue, activeSubscriptions;
 
     protected ConnectionManager(RocketChatMain plugin) {
@@ -62,7 +62,7 @@ public class ConnectionManager {
         this.reconnectTime = 10;
         this.weDisconnected = false;
 
-        this.messageQueue = new LinkedList<IMessage>();
+        this.messageQueue = new LinkedList<RocketChatMessage>();
         
         this.subscriptionQueue = new LinkedList<RocketChatSubscription>();
         this.activeSubscriptions = new LinkedList<RocketChatSubscription>();
@@ -101,7 +101,7 @@ public class ConnectionManager {
     
     private void tryToConnect() {
         try {
-            this.ddp = new DDPClient(Settings.HOST.asString(), Settings.PORT.asInt(), Settings.SSL.asBoolean());
+            this.ddp = new DDPClient(Settings.HOST.asString(), Settings.PORT.asInt(), Settings.SSL.asBoolean(), new GsonBuilder().excludeFieldsWithModifiers(Modifier.STATIC, Modifier.TRANSIENT, Modifier.VOLATILE).excludeFieldsWithoutExposeAnnotation().create());
             this.ddp.addObserver(new ConnectionAndLoginObserver());
             this.ddp.connect();
         } catch (URISyntaxException e) {
@@ -162,12 +162,15 @@ public class ConnectionManager {
     private BukkitTask attemptLogin() {
         return this.plugin.getServer().getScheduler().runTaskLaterAsynchronously(plugin, () -> {
             Object[] loginArgs = new Object[1];
-            if (Settings.USERNAME.asString().isEmpty()) {
+            if (Settings.EMAIL.asString().isEmpty() && Settings.USERNAME.asString().isEmpty()) {
+                this.plugin.debug(false, "Attempting to log into Rocket.Chat with the auth token.");
+                loginArgs[0] = new RocketChatAuthModel("", Settings.PASSWORD.asString(), RocketChatAuthModel.RocketChatAuthMethod.TOKEN);
+            } else if (Settings.USERNAME.asString().isEmpty()) {
                 this.plugin.debug(false, "Attempting to log into Rocket.Chat as: " + Settings.EMAIL.asString());
-                loginArgs[0] = new EmailAuth(Settings.EMAIL.asString(), Settings.PASSWORD.asString());
+                loginArgs[0] = new RocketChatAuthModel(Settings.EMAIL   .asString(), Settings.PASSWORD.asString(), RocketChatAuthModel.RocketChatAuthMethod.USERNAME);
             } else {
                 this.plugin.debug(false, "Attempting to log into Rocket.Chat as: " + Settings.USERNAME.asString());
-                loginArgs[0] = new UsernameAuth(Settings.USERNAME.asString(), Settings.PASSWORD.asString());
+                loginArgs[0] = new RocketChatAuthModel(Settings.USERNAME.asString(), Settings.PASSWORD.asString(), RocketChatAuthModel.RocketChatAuthMethod.USERNAME);
             }
             this.ddp.call(Method.LOGIN.get(), loginArgs, new ConnectionAndLoginObserver());
         }, 0);
@@ -193,10 +196,10 @@ public class ConnectionManager {
     }
 
     private void processMessageQueue() {
-        List<IMessage> processing = new LinkedList<IMessage>(this.messageQueue);
+        List<RocketChatMessage> processing = new LinkedList<RocketChatMessage>(this.messageQueue);
         this.messageQueue.clear();
 
-        processing.forEach(m -> ddp.call(Method.SENDMESSAGE.get(), new Object[] { RocketChatSerializerFactory.getMessage(m) }));
+        processing.forEach(m -> ddp.call(Method.SENDMESSAGE.get(), new Object[] { m }));
     }
 
     private void stopProcessingQueue() {
@@ -258,10 +261,10 @@ public class ConnectionManager {
     /**
      * Adds a message to the queue. The queue is processed twice a second.
      *
-     * @param message the {@link IMessage} to queue
+     * @param message the {@link RocketChatMessage} to queue
      * @return whether it was added to the queue or not
      */
-    protected boolean queueMessage(IMessage message) {
+    protected boolean queueMessage(RocketChatMessage message) {
         return this.messageQueue.add(message);
     }
 

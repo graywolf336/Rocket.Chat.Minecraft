@@ -4,7 +4,6 @@ import org.apache.commons.lang.Validate;
 
 import com.graywolf336.rocketchat.enums.ConnectionState;
 import com.graywolf336.rocketchat.enums.Method;
-import com.graywolf336.rocketchat.interfaces.IMessage;
 import com.graywolf336.rocketchat.listeners.RocketChatCallListener;
 import com.graywolf336.rocketchat.objects.RocketChatMessage;
 import com.graywolf336.rocketchat.objects.RocketChatSubscription;
@@ -104,13 +103,11 @@ public class RocketChatClient {
      * <p>
      * A message must have at least the <strong>room</strong> and <strong>message</strong> set,
      * otherwise it will not be a valid message format.
-     * <p>
-     * If you don't want to create your own {@link IMessage} wrapper, then use {@link RocketChatMessage}.
      *
-     * @param message the {@link IMessage} to send
+     * @param message the {@link RocketChatMessage} to send
      * @return whether the message was successfully queued up or not
      */
-    public boolean sendMessage(IMessage message) {
+    public boolean sendMessage(RocketChatMessage message) {
         return message != null && message.isValid() ? this.conn.queueMessage(message) : false;
     }
 }

@@ -1,0 +1,9 @@
+join-leave:
+  enabled: true
+  room: '#testing-ddp'
+  avatar-url: 'https://crafatar.com/renders/head/{UUID}?overlay'
+  use-display-name: false
+  join-message: '{USERNAME} has joined the server, just to let you know. :wink:'
+  leave-message: 'Say bye bye, because {USERNAME} has disconnected from the server. :stuck_out_tongue_winking_eye:'
+  kick-message: 'Uh oh, what did they do!? {USERNAME} got kicked from the server! :scream:'
+  ignore-permission: 'vanish.silentjoin'
