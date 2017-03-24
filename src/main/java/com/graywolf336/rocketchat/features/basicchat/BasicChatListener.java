@@ -30,7 +30,7 @@ public class BasicChatListener implements Listener {
         RocketChatMessage msg = new RocketChatMessage(ChatColor.stripColor(event.getMessage()));
         msg.setRoom(room.get());
         msg.setAvatar(avatar);
-        msg.setGroupable(true);
+        msg.setGroupable(false);
         msg.setParseUrls(false);
         
         if (BasicChatSetting.USE_DISPLAY_NAME.asBoolean()) {
